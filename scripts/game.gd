@@ -147,6 +147,14 @@ func _select_dungeon() -> void:
 	if dungeon_data.is_empty():
 		dungeon_n = 1
 		dungeon_data = Data.dungeon(1)
+	for a2 in OS.get_cmdline_user_args():      # 검증용: --dmult=hp,boss,count,coin 으로 이 던전 배수를 덮어씀(메모리만)
+		if a2.begins_with("--dmult=") and not dungeon_data.is_empty():
+			var p2 := a2.substr(8).split(",")
+			dungeon_data = dungeon_data.duplicate()
+			dungeon_data["hp_mult"] = float(p2[0])
+			dungeon_data["boss_hp_mult"] = float(p2[1])
+			dungeon_data["count_mult"] = float(p2[2])
+			dungeon_data["coin_mult"] = float(p2[3])
 
 
 func _total_waves() -> int:

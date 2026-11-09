@@ -526,10 +526,22 @@ func _refresh() -> void:
 
 # ------------------------------------------------------------------ 첫 실행 · 일일 보상
 func _first_run_flow() -> void:
+	_kakao_warning()
 	if save != null and not save.tutorial_done:
 		_show_tutorial(true)
 	else:
 		_daily_popup()
+
+
+## 카카오톡 안 브라우저(웹에서만, JavaScriptBridge 가 있을 때만)면 한 번 안내
+func _kakao_warning() -> void:
+	if not OS.has_feature("web") or Engine.has_meta("kakao_warned") or not Engine.has_singleton("JavaScriptBridge"):
+		return
+	var ua = JavaScriptBridge.eval("navigator.userAgent", true)
+	Engine.set_meta("kakao_warned", true)
+	if ua != null and str(ua).to_upper().contains("KAKAOTALK"):
+		await get_tree().create_timer(0.8).timeout
+		K.toast(self, "카카오톡 안 브라우저에서는 게임이 멈출 수 있어요\n크롬/사파리를 권장해요", 150.0, Color(1, 0.85, 0.5))
 
 
 func _show_tutorial(first: bool) -> void:
@@ -589,8 +601,10 @@ func _shot_setup() -> void:
 		"say":
 			for cid in char_ids:
 				_say(cid, _pick(LD.TAP_BUBBLES.get(cid, LD.GENERIC_BUBBLES)), 5.0)
-		"ranking", "ranking_empty", "ranking_fail":
+		"ranking", "ranking_empty", "ranking_fail", "ranking_guest", "ranking_error":
 			_show_page("ranking")
+			for i in 3:   # JmbLink 의 비동기 응답(게스트 안내)이 먼저 도착한 뒤에 시험 데이터를 넣음
+				await get_tree().process_frame
 			if start_page == "ranking":
 				ranking.show_data({"scope": "week", "mine": {"rank": 12, "nick": "게스트", "wave": 23, "score": 9120},
 						"top": [{"rank": 1, "nick": "보드게임왕", "wave": 40, "score": 31200}, {"rank": 2, "nick": "여름이", "wave": 38, "score": 28800},
@@ -599,6 +613,10 @@ func _shot_setup() -> void:
 						{"rank": 7, "nick": "잠만보", "wave": 29, "score": 16000}, {"rank": 8, "nick": "랜덤신", "wave": 27, "score": 14900}]})
 			elif start_page == "ranking_empty":
 				ranking.show_data({"scope": "week", "mine": {}, "top": []})
+			elif start_page == "ranking_guest":
+				ranking.show_data({"scope": "week", "mine": {"rank": 0, "nick": "", "wave": 0, "score": 0}, "top": [], "guest": true})
+			elif start_page == "ranking_error":
+				ranking.show_data({"scope": "week", "mine": {}, "top": [], "error": "서버가 바빠요. 잠시 뒤에 다시 시도해 주세요."})
 			else:
 				ranking.show_state("fail")
 	for i in 6:

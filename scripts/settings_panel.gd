@@ -120,8 +120,9 @@ func _build() -> void:
 			K.WHITE, HORIZONTAL_ALIGNMENT_LEFT, false))
 	add_child(K.label("지금까지 처치한 적 %d마리" % kills, 24, Vector2(80, 1060), Vector2(560, 46), K.DIM,
 			HORIZONTAL_ALIGNMENT_LEFT, false))
-	add_child(K.label("저장은 이 기기의 브라우저에만 돼요 (광고·결제 없음)", 20, Vector2(30, 1146), Vector2(660, 36), K.DIM,
-			HORIZONTAL_ALIGNMENT_CENTER, false))
+	var note := K.label("기록과 랭킹에는 잠만보 닉네임·웨이브·플레이 시간만 저장돼요.\n로그인하지 않아도 게임은 할 수 있어요. (광고·결제 없음)", 20,
+			Vector2(30, 1130), Vector2(660, 70), K.DIM, HORIZONTAL_ALIGNMENT_CENTER, false)
+	add_child(note)
 	add_child(K.label(VERSION_TEXT, 22, Vector2(0, 1220), Vector2(720, 36), K.DIM, HORIZONTAL_ALIGNMENT_CENTER, false))
 
 

@@ -16,6 +16,7 @@ var scope: String = "week"
 var layer: Control
 var body: Control
 var state: String = "loading"
+var message: String = ""   # fail 상태에서 보여 줄 서버/연동 문구
 var data: Dictionary = {}
 var _req_id: int = 0
 
@@ -32,10 +33,11 @@ func _ready() -> void:
 
 func request() -> void:
 	state = "loading"
+	message = ""
 	_req_id += 1
 	_render()
 	if link == null or not link.has_method("request_rank"):
-		show_state("fail")
+		show_state("guest")
 		return
 	link.request_rank(scope)
 	var id := _req_id
@@ -50,9 +52,18 @@ func _on_loaded(d: Dictionary) -> void:
 	show_data(d)
 
 
+## JmbLink 가 주는 data: top 이 비어 있고 guest=true 면 '로그인 안내', error 가 있으면 '실패(문구)',
+## top 도 비고 오류도 없으면 '진짜 빈 랭킹', mine.rank 가 0 이면 내 순위는 숨김.
 func show_data(d: Dictionary) -> void:
 	data = d
-	state = "ready" if (d.get("top", []) as Array).size() > 0 or not (d.get("mine", {}) as Dictionary).is_empty() else "empty"
+	var top: Array = d.get("top", [])
+	message = str(d.get("error", ""))
+	if message != "" and top.is_empty():
+		state = "fail"
+	elif top.is_empty():
+		state = "guest" if bool(d.get("guest", false)) else "empty"
+	else:
+		state = "ready"
 	_render()
 
 
@@ -102,10 +113,18 @@ func _render() -> void:
 			body.add_child(K.label("불러오는 중...", 32, Vector2(0, 560), Vector2(720, 60), K.DIM))
 		"fail":
 			body.add_child(K.label("랭킹을 불러오지 못했어요", 30, Vector2(0, 500), Vector2(720, 60), Color(1, 0.7, 0.7)))
-			body.add_child(K.label("잠시 뒤에 다시 시도해 주세요", 22, Vector2(0, 560), Vector2(720, 40), K.DIM, HORIZONTAL_ALIGNMENT_CENTER, false))
+			var why := message if message != "" else "잠시 뒤에 다시 시도해 주세요"
+			var wl := K.label(why, 22, Vector2(60, 560), Vector2(600, 60), K.DIM, HORIZONTAL_ALIGNMENT_CENTER, false)
+			wl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			wl.size = Vector2(600, 60)
+			body.add_child(wl)
 			body.add_child(K.button("res://assets/td/ui/btn_gray_big.png", "다시 시도", Rect2(220, 630, 280, 90), func():
 				Sfx.play("button")
 				request(), 30))
+		"guest":
+			body.add_child(K.label("잠만보에서 로그인하면\n랭킹에 참여해요", 32, Vector2(0, 430), Vector2(720, 120), K.WHITE))
+			body.add_child(K.label("로그인하지 않아도 게임은 할 수 있어요", 22, Vector2(0, 565), Vector2(720, 40), K.DIM, HORIZONTAL_ALIGNMENT_CENTER, false))
+			body.add_child(K.button("res://assets/td/ui/btn_blue_big.png", "잠만보 모임 보러가기", Rect2(150, 640, 420, 100), _open_jmb, 26))
 		"empty":
 			body.add_child(K.label("아직 기록이 없어요", 32, Vector2(0, 520), Vector2(720, 60), K.WHITE))
 			body.add_child(K.label("한 판 이기고 첫 기록을 남겨 보세요!", 22, Vector2(0, 585), Vector2(720, 40), K.DIM, HORIZONTAL_ALIGNMENT_CENTER, false))
@@ -120,12 +139,23 @@ func _render_list() -> void:
 		var e: Dictionary = top[i]
 		_row(body, 226.0 + i * 70.0, e, false)
 	var mine: Dictionary = data.get("mine", {})
-	if not mine.is_empty():
+	if bool(data.get("guest", false)):
+		body.add_child(K.label("잠만보에서 로그인하면 내 순위도 올라가요", 22, Vector2(0, 960), Vector2(720, 40), K.DIM, HORIZONTAL_ALIGNMENT_CENTER, false))
+		body.add_child(K.button("res://assets/td/ui/btn_blue_big.png", "잠만보 모임 보러가기", Rect2(150, 1010, 420, 90), _open_jmb, 24))
+	elif not mine.is_empty() and int(mine.get("rank", 0)) > 0:
 		body.add_child(K.label("내 순위", 24, Vector2(60, 936), Vector2(200, 36), K.GOLD, HORIZONTAL_ALIGNMENT_LEFT))
 		_row(body, 978.0, mine, true)
 	else:
 		body.add_child(K.label("기록을 남기면 내 순위가 여기에 나와요", 22, Vector2(0, 980), Vector2(720, 40), K.DIM,
 				HORIZONTAL_ALIGNMENT_CENTER, false))
+
+
+func _open_jmb() -> void:
+	Sfx.play("button")
+	if link != null and link.has_method("open_jammanbo"):
+		link.open_jammanbo()
+	else:
+		K.toast(self, "잠만보 연동은 곧 열려요!", 520.0)
 
 
 func _row(parent: Control, y: float, e: Dictionary, mine: bool) -> void:

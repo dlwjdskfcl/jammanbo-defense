@@ -57,6 +57,14 @@ static func v(key: String) -> float:
 	return float(s.get(key, DEFAULTS.get(key, 0.0)))
 
 
+## 검증용 인자 --card-lv=N : 반려+모임 카드를 모두 Lv N 으로 가정(저장 파일은 건드리지 않음). 없으면 -1
+static func forced_lv() -> int:
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--card-lv="):
+			return clampi(int(a.substr(10)), 1, 15)
+	return -1
+
+
 static func _save_node() -> Node:
 	var tree := Engine.get_main_loop() as SceneTree
 	return tree.root.get_node_or_null("/root/Save") if tree != null else null
@@ -67,6 +75,9 @@ static func unlocked(char_id: String, tier: int) -> bool:
 		return true
 	if not Data.is_pet(char_id):       # 모임 유닛은 반려 스킬이 없음
 		return false
+	var fl := forced_lv()
+	if fl > 0:
+		return fl >= (6 if tier == 1 else 12)
 	if "--all-skills" in OS.get_cmdline_user_args():     # 검증용: Lv6/Lv12 스킬을 모두 켬
 		return true
 	var sv := _save_node()
@@ -77,6 +88,9 @@ static func unlocked(char_id: String, tier: int) -> bool:
 
 static func card_mult(char_id: String) -> float:
 	var sv := _save_node()
+	var fl := forced_lv()
+	if fl > 0 and sv != null and sv.has_method("mult_of_level"):
+		return float(sv.mult_of_level(fl))
 	if sv != null and sv.has_method("card_mult"):
 		return float(sv.card_mult(char_id if Data.is_pet(char_id) else "club"))   # 모임 유닛은 '모임 카드' 하나를 공유
 	return 1.0
@@ -84,6 +98,8 @@ static func card_mult(char_id: String) -> float:
 
 static func card_level(char_id: String) -> int:
 	var sv := _save_node()
+	if forced_lv() > 0:
+		return forced_lv()
 	if sv != null and sv.has_method("card_level"):
 		return int(sv.card_level(char_id))
 	return 1
