@@ -20,6 +20,7 @@ config/icon="res://assets/icon.png"
 Data="*res://scripts/data.gd"
 Sfx="*res://scripts/sfx.gd"
 Save="*res://scripts/save.gd"
+JmbLink="*res://scripts/jmb_link.gd"
 
 [display]
 

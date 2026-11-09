@@ -112,6 +112,149 @@ try {
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {});
 } catch (e) { $('note').textContent = '⚠ 저장 기능을 쓸 수 없어요. 진행 상황이 저장되지 않을 수 있어요.'; }
 
+// ---------------------------------------------------------------------------------------------------------------
+// 잠만보 연동 (window.JMBDEF) — 설계: 설정집/잠만보_연동_설계.md §5. 게임(Godot) 쪽은 scripts/jmb_link.gd(JmbLink) 만 이 객체를 부름.
+//  · 잠만보와 같은 출처(dlwjdskfcl.github.io)라 잠만보 로그인 저장소를 읽을 수 있음. 카카오 30일 토큰은 이 안에서만 읽고 Godot 로 넘기지 않음
+//    → 서버(defenseTicket)에서 '디펜스 전용 입장권(2시간)'으로 바꿔 쓰고, 입장권도 sessionStorage 에만 둠. 카카오 ID·프로필은 어디로도 안 감
+//  · 요청은 text/plain 으로 보냄(CORS '단순 요청' — Apps Script 는 사전 확인 요청에 답하지 않음)
+//  · 비동기 결과는 out[id] 에 쌓아 두고 Godot 가 take(id) 로 가져감. 로그인 안 했거나 서버가 안 되면 조용히 게스트 — 게임은 항상 정상 동작
+//  · 환경: 주소에 ?env=beta 가 있으면 잠만보 '테스트' 배포(+ 키 접미사 _beta), 없으면 운영. GAS 주소는 잠만보 config.js 에 이미 공개된 값
+// ---------------------------------------------------------------------------------------------------------------
+var JMBDEF = window.JMBDEF = (function () {
+  var ENV = /[?&]env=beta(&|#|$)/.test(location.search) ? 'beta' : 'prod', SFX = ENV === 'beta' ? '_beta' : '';
+  var API = ENV === 'beta'
+    ? 'https://script.google.com/macros/s/AKfycbwbDyYxw__R89IxnfekTwERd5xKK5y54h_6YcVNBYZLdg6K1U4n98hdoBh7OiIVUBia/exec'
+    : 'https://script.google.com/macros/s/AKfycbwvE4TAy7rTGJe2FPIHh-norBPsZ_7oY5Cb8tQKEd53hDhXaUIVF4MGPL6Tb4pdEFFN/exec';
+  var K_TICKET = 'jmbdef_ticket' + SFX, K_PENDING = 'jmbdef_pending' + SFX, K_VISIT = 'jmbdef_visit_at' + SFX, K_RANK = 'jmbdef_rank_';
+  var PENDING_MAX = 5, NONCE_MS = 3 * 3600 * 1000;   // 서버는 시작 후 3시간 안에만 기록을 받음
+  var ticket = null, tkP = null, run = null, out = {};
+
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function ssGet(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
+  function ssSet(k, v) { try { if (v == null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) {} }
+  function jget(s) { try { return JSON.parse(s); } catch (e) { return null; } }
+  function kakaoToken() { var s = jget(lsGet('jmb_kakao_v2' + SFX)); return s && typeof s.token === 'string' ? s.token : ''; }
+  function err(msg, flag) { var e = new Error(msg); if (flag) e[flag] = true; return e; }
+
+  // 서버 호출: 네트워크·응답 형식 문제는 e.net, 서버가 거절한 것은 e.server
+  function post(fn, args) {
+    var ctl = window.AbortController ? new AbortController() : null, timer = setTimeout(function () { if (ctl) ctl.abort(); }, 20000);
+    return fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, signal: ctl ? ctl.signal : undefined,
+        body: JSON.stringify({ fn: fn, args: args, env: ENV }) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) { clearTimeout(timer); return j; }, function () { clearTimeout(timer); throw err('network', 'net'); })
+      .then(function (j) { if (!j || j.ok !== true) throw err((j && j.e) || '오류', 'server'); return j.r; });
+  }
+
+  // 입장권: 있으면 재사용, 없거나 곧 만료면 로그인 토큰으로 교환 (로그인 안 했으면 guest 로 거절)
+  var cached = jget(ssGet(K_TICKET));
+  if (cached && cached.t && cached.exp > Date.now() + 300000) ticket = cached;
+  function getTicket() {
+    if (ticket && ticket.exp > Date.now() + 120000) return Promise.resolve(ticket);
+    if (tkP) return tkP;
+    var tok = kakaoToken();
+    if (!tok) return Promise.reject(err('guest', 'guest'));
+    tkP = post('defenseTicket', [tok]).then(function (r) {
+      ticket = { t: r.ticket, nick: r.nick, exp: r.exp }; ssSet(K_TICKET, JSON.stringify(ticket)); tkP = null; return ticket;
+    }, function (e) { tkP = null; throw e; });
+    return tkP;
+  }
+  // 입장권이 필요한 호출. 서버가 expired 라고 하면 입장권을 새로 받아 한 번만 다시
+  function withTicket(fn) {
+    return getTicket().then(fn).catch(function (e) {
+      if (e && e.server && e.message === 'expired') { ticket = null; ssSet(K_TICKET, null); return getTicket().then(fn); }
+      throw e;
+    });
+  }
+
+  // 재시도 대기열 (네트워크 실패로 못 보낸 판 결과) — 다음 로비 진입 때 flush
+  function queue() { var q = jget(lsGet(K_PENDING)); return Array.isArray(q) ? q : []; }
+  function saveQueue(q) { lsSet(K_PENDING, JSON.stringify(q.slice(-PENDING_MAX))); }
+  function enqueue(item) { var q = queue(); q.push(item); saveQueue(q); }
+  function sendItem(item) { return withTicket(function (t) { return post('defenseSubmit', [t.t, item.nonce, item.result]); }); }
+  function flush() {
+    var q = queue().filter(function (it) { return it && it.nonce && Date.now() - it.at < NONCE_MS; }), sent = 0;
+    saveQueue(q);
+    function next() {
+      if (!q.length) return Promise.resolve({ sent: sent, left: 0 });
+      return sendItem(q[0]).then(function () { q.shift(); sent++; saveQueue(q); return next(); }, function (e) {
+        if (e && (e.net || e.guest)) return { sent: sent, left: q.length };   // 아직 연결 안 됨 · 로그아웃 상태 → 그대로 두고 다음에
+        q.shift(); saveQueue(q); return next();                                // 서버가 거절한 건 다시 보내도 같음 → 버림
+      });
+    }
+    return next();
+  }
+
+  function deviceId() {   // 잠만보 화면·티츄와 같은 기기 구분 값 (개인 정보 아님) — 접속기록의 '추정닉네임'이 같은 기기로 이어짐
+    var id = lsGet('jmb_vid');
+    if (!id) { id = Date.now().toString(36) + Math.random().toString(36).slice(2, 10); lsSet('jmb_vid', id); }
+    return id;
+  }
+  function visit() {   // 접속 기록: 기기마다 30분에 한 번 (서버도 25분 중복 거름)
+    if (Date.now() - (+lsGet(K_VISIT) || 0) < 30 * 60e3) return Promise.resolve({ skip: 1 });
+    lsSet(K_VISIT, String(Date.now()));
+    var info = { cid: deviceId(), ua: navigator.userAgent, w: screen.width, h: screen.height, touch: navigator.maxTouchPoints || 0,
+      app: (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone ? 1 : 0 };
+    var uad = navigator.userAgentData;
+    if (uad) info.mobile = !!uad.mobile;
+    var model = uad && uad.getHighEntropyValues ? uad.getHighEntropyValues(['model']).then(function (h) { info.model = h.model || ''; }, function () {}) : Promise.resolve();
+    return model.then(function () { return getTicket().then(function (t) { return t.t; }, function () { return ''; }); })
+      .then(function (tk) { return post('defenseVisit', [tk, info]); });
+  }
+
+  var OPS = {
+    // 로그인 확인 → {nick}. 로그인 안 했으면 nick '' (게스트). 닉네임 미연결 등 서버 문구는 msg 로
+    login: function () {
+      return getTicket().then(function (t) { return { nick: t.nick }; }, function (e) {
+        if (e && e.guest) return { nick: '' };
+        throw e;
+      });
+    },
+    rank: function (a) {
+      var scope = a.scope === 'week' || a.scope === 'season' ? a.scope : 'all';
+      return getTicket().then(function () { return withTicket(function (t) { return post('defenseInfo', [t.t, scope]); }); }, function (e) {
+        if (e && e.guest) return { guest: true, scope: scope, mine: null, top: [] };
+        throw e;
+      }).then(function (r) { if (r && !r.guest) lsSet(K_RANK + scope + SFX, JSON.stringify(r)); return r; });
+    },
+    // 판 시작: 확인값(nonce)은 여기 보관(Godot 로 안 줌). 기다리지 않고 판은 바로 시작됨
+    start: function (a) {
+      var meta = { ver: BUILD, dungeon: a.dungeon > 0 ? a.dungeon : 1 };
+      var p = withTicket(function (t) { return post('defenseStart', [t.t, meta]); }).then(function (r) { return r.nonce; });
+      run = { p: p, at: Date.now() };
+      p.catch(function () {});
+      return p.then(function () { return {}; });
+    },
+    // 판 결과: 시작 확인값이 없으면(게스트·서버 오류) 기록 안 함. 네트워크 실패면 대기열에 넣고 나중에 다시
+    submit: function (a) {
+      var r = run; run = null;
+      if (!r) return Promise.resolve({ skipped: 1 });
+      return r.p.then(function (nonce) {
+        var item = { nonce: nonce, at: r.at, result: a.result };
+        return sendItem(item).catch(function (e) { if (e && e.net) { enqueue(item); return { queued: 1 }; } throw e; });
+      }, function () { return { skipped: 1 }; });
+    },
+    flush: flush,
+    visit: visit
+  };
+
+  // Godot → call(id, op, JSON 인자 글자) 로 시작, take(id) 로 결과 가져감 ('wait' 이면 아직)
+  function call(id, op, argsJson) {
+    out[id] = { state: 'wait' };
+    var done = function (v) { out[id] = v; };
+    try {
+      var a = argsJson ? JSON.parse(argsJson) : {};
+      Promise.resolve(OPS[op](a || {})).then(function (d) { done({ state: 'ok', data: d == null ? {} : d }); },
+        function (e) { done({ state: 'err', msg: String(e && e.message || e), net: !!(e && e.net) }); });
+    } catch (e) { done({ state: 'err', msg: String(e && e.message || e) }); }
+  }
+  function take(id) { var v = out[id]; if (v && v.state !== 'wait') delete out[id]; return JSON.stringify(v || null); }
+  function cachedRank(scope) { return lsGet(K_RANK + (scope === 'week' || scope === 'season' ? scope : 'all') + SFX) || 'null'; }   // 마지막으로 받은 랭킹(먼저 보여 주기용)
+
+  return { env: ENV, call: call, take: take, cachedRank: cachedRank };
+})();
+
 var GODOT_CONFIG = $GODOT_CONFIG;
 var engine = new Engine(GODOT_CONFIG);
 
