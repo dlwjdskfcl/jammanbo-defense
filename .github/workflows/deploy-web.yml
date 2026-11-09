@@ -1,0 +1,46 @@
+# Godot 웹 빌드 → GitHub Pages 자동 배포 (무료). ※ 아직 실제 저장소에서 실행해 보지 않은 초안입니다.
+# 사용: 이 '게임' 폴더 내용을 GitHub 저장소 루트로 올리고, 저장소 Settings → Pages → Source 를 "GitHub Actions" 로 설정.
+name: deploy-web
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+env:
+  GODOT_VERSION: "4.7.2"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Godot + 내보내기 템플릿 설치
+        run: |
+          wget -q https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip
+          wget -q https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz
+          unzip -q Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip
+          mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          unzip -q Godot_v${GODOT_VERSION}-stable_export_templates.tpz -d /tmp/tpl
+          mv /tmp/tpl/templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/
+      - name: 에셋 가져오기 + 웹 내보내기
+        run: |
+          mkdir -p build
+          ./Godot_v${GODOT_VERSION}-stable_linux.x86_64 --headless --import || true
+          ./Godot_v${GODOT_VERSION}-stable_linux.x86_64 --headless --export-release "Web" build/index.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

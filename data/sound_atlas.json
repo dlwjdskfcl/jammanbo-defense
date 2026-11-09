@@ -1,0 +1,258 @@
+{
+  "sample_rate": 22050,
+  "format": "wav 16bit mono",
+  "sounds": {
+    "click": {
+      "file": "sfx/click.wav",
+      "label": "버튼 클릭",
+      "usage": "UI 버튼",
+      "seconds": 0.05,
+      "loop": false
+    },
+    "coin": {
+      "file": "sfx/coin.wav",
+      "label": "코인 획득",
+      "usage": "처치 보상, 코인 UI",
+      "seconds": 0.23,
+      "loop": false
+    },
+    "error": {
+      "file": "sfx/error.wav",
+      "label": "실패(코인 부족/슬롯 없음)",
+      "usage": "소환·합성 실패",
+      "seconds": 0.27,
+      "loop": false
+    },
+    "summon": {
+      "file": "sfx/summon.wav",
+      "label": "랜덤 소환",
+      "usage": "유닛 소환",
+      "seconds": 0.4,
+      "loop": false
+    },
+    "merge_g2": {
+      "file": "sfx/merge_g2.wav",
+      "label": "합성 2성",
+      "usage": "일반→희귀",
+      "seconds": 0.46,
+      "loop": false
+    },
+    "merge_g3": {
+      "file": "sfx/merge_g3.wav",
+      "label": "합성 3성",
+      "usage": "희귀→영웅",
+      "seconds": 0.64,
+      "loop": false
+    },
+    "merge_g4": {
+      "file": "sfx/merge_g4.wav",
+      "label": "합성 4성",
+      "usage": "영웅→전설",
+      "seconds": 0.72,
+      "loop": false
+    },
+    "merge_g5": {
+      "file": "sfx/merge_g5.wav",
+      "label": "합성 5성(신화)",
+      "usage": "전설→신화 팡파르",
+      "seconds": 1.33,
+      "loop": false
+    },
+    "attack_claw": {
+      "file": "sfx/attack_claw.wav",
+      "label": "아르 발톱 슬래시",
+      "usage": "아르 공격",
+      "seconds": 0.12,
+      "loop": false
+    },
+    "attack_heart": {
+      "file": "sfx/attack_heart.wav",
+      "label": "마니 하트",
+      "usage": "마니 공격",
+      "seconds": 0.25,
+      "loop": false
+    },
+    "attack_pounce": {
+      "file": "sfx/attack_pounce.wav",
+      "label": "마니 점프",
+      "usage": "마니 점프 동작",
+      "seconds": 0.22,
+      "loop": false
+    },
+    "attack_bark": {
+      "file": "sfx/attack_bark.wav",
+      "label": "여름 짖음",
+      "usage": "여름 공격",
+      "seconds": 0.26,
+      "loop": false
+    },
+    "hit": {
+      "file": "sfx/hit.wav",
+      "label": "피격",
+      "usage": "적 피격",
+      "seconds": 0.08,
+      "loop": false
+    },
+    "enemy_die": {
+      "file": "sfx/enemy_die.wav",
+      "label": "적 처치",
+      "usage": "적 사망",
+      "seconds": 0.25,
+      "loop": false
+    },
+    "boss_die": {
+      "file": "sfx/boss_die.wav",
+      "label": "보스 처치",
+      "usage": "보스 사망",
+      "seconds": 1.15,
+      "loop": false
+    },
+    "wave_start": {
+      "file": "sfx/wave_start.wav",
+      "label": "웨이브 시작",
+      "usage": "웨이브 시작 알림",
+      "seconds": 0.44,
+      "loop": false
+    },
+    "boss_warning": {
+      "file": "sfx/boss_warning.wav",
+      "label": "보스 경고",
+      "usage": "보스 등장 전",
+      "seconds": 0.96,
+      "loop": false
+    },
+    "life_lost": {
+      "file": "sfx/life_lost.wav",
+      "label": "목숨 감소",
+      "usage": "적 통과",
+      "seconds": 0.4,
+      "loop": false
+    },
+    "water_splash": {
+      "file": "sfx/water_splash.wav",
+      "label": "물 튀김",
+      "usage": "물웅덩이 위험 요소",
+      "seconds": 0.35,
+      "loop": false
+    },
+    "vacuum_loop": {
+      "file": "sfx/vacuum_loop.wav",
+      "label": "청소기 소리(루프)",
+      "usage": "청소기 적 등장/이동",
+      "seconds": 1.0,
+      "loop": true
+    },
+    "victory": {
+      "file": "sfx/victory.wav",
+      "label": "승리",
+      "usage": "게임 클리어",
+      "seconds": 1.98,
+      "loop": false
+    },
+    "defeat": {
+      "file": "sfx/defeat.wav",
+      "label": "패배",
+      "usage": "게임 오버",
+      "seconds": 1.55,
+      "loop": false
+    },
+    "arr_meow_scared": {
+      "file": "voice/arr_meow_scared.wav",
+      "label": "아르 겁먹은 야옹",
+      "usage": "scared 동작/표정",
+      "seconds": 0.42,
+      "loop": false
+    },
+    "arr_meow": {
+      "file": "voice/arr_meow.wav",
+      "label": "아르 야옹",
+      "usage": "idle/소환",
+      "seconds": 0.34,
+      "loop": false
+    },
+    "mani_meow": {
+      "file": "voice/mani_meow.wav",
+      "label": "마니 야옹(느긋)",
+      "usage": "idle/소환",
+      "seconds": 0.46,
+      "loop": false
+    },
+    "mani_purr": {
+      "file": "voice/mani_purr.wav",
+      "label": "마니 골골송",
+      "usage": "loving 표정/chill 동작",
+      "seconds": 0.9,
+      "loop": false
+    },
+    "yeoreum_bark": {
+      "file": "voice/yeoreum_bark.wav",
+      "label": "여름 짖음(경쾌)",
+      "usage": "pester/소환",
+      "seconds": 0.24,
+      "loop": false
+    },
+    "yeoreum_whine": {
+      "file": "voice/yeoreum_whine.wav",
+      "label": "여름 낑낑",
+      "usage": "lonely 표정",
+      "seconds": 0.7,
+      "loop": false
+    },
+    "yeoreum_pant": {
+      "file": "voice/yeoreum_pant.wav",
+      "label": "여름 헥헥",
+      "usage": "idle/pester",
+      "seconds": 0.6,
+      "loop": false
+    },
+    "yeoreum_yelp": {
+      "file": "voice/yeoreum_yelp.wav",
+      "label": "여름 깨갱",
+      "usage": "hurt 동작",
+      "seconds": 0.2,
+      "loop": false
+    },
+    "bgm_menu": {
+      "file": "bgm/bgm_menu.wav",
+      "label": "타이틀/로비 BGM (밝고 느긋)",
+      "usage": "배경음악",
+      "seconds": 20.0,
+      "loop": true
+    },
+    "bgm_battle": {
+      "file": "bgm/bgm_battle.wav",
+      "label": "전투 BGM (경쾌한 단조)",
+      "usage": "배경음악",
+      "seconds": 14.55,
+      "loop": true
+    },
+    "bgm_boss": {
+      "file": "bgm/bgm_boss.wav",
+      "label": "보스전 BGM (긴박)",
+      "usage": "배경음악",
+      "seconds": 12.8,
+      "loop": true
+    }
+  },
+  "events": {
+    "summon": "summon",
+    "merge_2": "merge_g2",
+    "merge_3": "merge_g3",
+    "merge_4": "merge_g4",
+    "merge_5": "merge_g5",
+    "attack_arr": "attack_claw",
+    "attack_mani": "attack_heart",
+    "attack_yeoreum": "attack_bark",
+    "enemy_hit": "hit",
+    "enemy_die": "enemy_die",
+    "boss_die": "boss_die",
+    "wave_start": "wave_start",
+    "boss_warning": "boss_warning",
+    "life_lost": "life_lost",
+    "coin": "coin",
+    "button": "click",
+    "no_coin": "error",
+    "win": "victory",
+    "lose": "defeat"
+  }
+}

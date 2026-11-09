@@ -1,0 +1,506 @@
+{
+  "tile_size": 64,
+  "unit_cell": [
+    64,
+    64
+  ],
+  "tiles": {
+    "size": 64,
+    "files": [
+      "grass_0.png",
+      "grass_1.png",
+      "grass_2.png",
+      "path_0.png",
+      "path_1.png",
+      "path_corner_bl.png",
+      "path_corner_br.png",
+      "path_corner_tl.png",
+      "path_corner_tr.png",
+      "path_h.png",
+      "path_v.png",
+      "prop_bush.png",
+      "prop_flower.png",
+      "prop_rock.png",
+      "prop_tree.png",
+      "slot_empty.png",
+      "slot_full.png",
+      "slot_hover.png"
+    ]
+  },
+  "units": {
+    "arr_g1": {
+      "character": "arr",
+      "name": "아르",
+      "grade": 1,
+      "grade_name": "일반",
+      "sheet": "units/arr_g1_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "arr_g2": {
+      "character": "arr",
+      "name": "아르",
+      "grade": 2,
+      "grade_name": "희귀",
+      "sheet": "units/arr_g2_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "arr_g3": {
+      "character": "arr",
+      "name": "아르",
+      "grade": 3,
+      "grade_name": "영웅",
+      "sheet": "units/arr_g3_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "arr_g4": {
+      "character": "arr",
+      "name": "아르",
+      "grade": 4,
+      "grade_name": "전설",
+      "sheet": "units/arr_g4_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "arr_g5": {
+      "character": "arr",
+      "name": "아르",
+      "grade": 5,
+      "grade_name": "신화",
+      "sheet": "units/arr_g5_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "mani_g1": {
+      "character": "mani",
+      "name": "마니",
+      "grade": 1,
+      "grade_name": "일반",
+      "sheet": "units/mani_g1_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "mani_g2": {
+      "character": "mani",
+      "name": "마니",
+      "grade": 2,
+      "grade_name": "희귀",
+      "sheet": "units/mani_g2_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "mani_g3": {
+      "character": "mani",
+      "name": "마니",
+      "grade": 3,
+      "grade_name": "영웅",
+      "sheet": "units/mani_g3_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "mani_g4": {
+      "character": "mani",
+      "name": "마니",
+      "grade": 4,
+      "grade_name": "전설",
+      "sheet": "units/mani_g4_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "mani_g5": {
+      "character": "mani",
+      "name": "마니",
+      "grade": 5,
+      "grade_name": "신화",
+      "sheet": "units/mani_g5_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "yeoreum_g1": {
+      "character": "yeoreum",
+      "name": "여름",
+      "grade": 1,
+      "grade_name": "일반",
+      "sheet": "units/yeoreum_g1_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "yeoreum_g2": {
+      "character": "yeoreum",
+      "name": "여름",
+      "grade": 2,
+      "grade_name": "희귀",
+      "sheet": "units/yeoreum_g2_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "yeoreum_g3": {
+      "character": "yeoreum",
+      "name": "여름",
+      "grade": 3,
+      "grade_name": "영웅",
+      "sheet": "units/yeoreum_g3_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "yeoreum_g4": {
+      "character": "yeoreum",
+      "name": "여름",
+      "grade": 4,
+      "grade_name": "전설",
+      "sheet": "units/yeoreum_g4_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "yeoreum_g5": {
+      "character": "yeoreum",
+      "name": "여름",
+      "grade": 5,
+      "grade_name": "신화",
+      "sheet": "units/yeoreum_g5_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    }
+  },
+  "enemies": {
+    "slime": {
+      "label": "물방울 슬라임",
+      "frames": [
+        "enemies/slime_0.png",
+        "enemies/slime_1.png",
+        "enemies/slime_2.png",
+        "enemies/slime_3.png"
+      ],
+      "fps": 8,
+      "size": [
+        48,
+        48
+      ],
+      "note": "일반 · 보통 속도"
+    },
+    "robot_vac": {
+      "label": "로봇 청소기",
+      "frames": [
+        "enemies/robot_vac_0.png",
+        "enemies/robot_vac_1.png",
+        "enemies/robot_vac_2.png",
+        "enemies/robot_vac_3.png"
+      ],
+      "fps": 10,
+      "size": [
+        48,
+        48
+      ],
+      "note": "탱커 · 느림 · 단단함"
+    },
+    "stranger": {
+      "label": "낯선 남자",
+      "frames": [
+        "enemies/stranger_0.png",
+        "enemies/stranger_1.png",
+        "enemies/stranger_2.png",
+        "enemies/stranger_3.png"
+      ],
+      "fps": 8,
+      "size": [
+        48,
+        48
+      ],
+      "note": "빠름 · 약함"
+    },
+    "cloud": {
+      "label": "외로움 구름",
+      "frames": [
+        "enemies/cloud_0.png",
+        "enemies/cloud_1.png"
+      ],
+      "fps": 4,
+      "size": [
+        48,
+        48
+      ],
+      "note": "공중 · 일부 공격 회피"
+    },
+    "boss_vacuum": {
+      "label": "대왕 청소기(보스)",
+      "frames": [
+        "enemies/boss_vacuum_0.png",
+        "enemies/boss_vacuum_1.png",
+        "enemies/boss_vacuum_2.png",
+        "enemies/boss_vacuum_3.png"
+      ],
+      "fps": 8,
+      "size": [
+        144,
+        96
+      ],
+      "note": "보스 · 매우 단단함"
+    },
+    "boss_stranger": {
+      "label": "수상한 거인(보스)",
+      "frames": [
+        "enemies/boss_stranger_0.png",
+        "enemies/boss_stranger_1.png",
+        "enemies/boss_stranger_2.png",
+        "enemies/boss_stranger_3.png"
+      ],
+      "fps": 6,
+      "size": [
+        64,
+        96
+      ],
+      "note": "보스 · 빠른 보스"
+    }
+  },
+  "projectiles": {
+    "claw": {
+      "label": "발톱 슬래시(아르)",
+      "frames": [
+        "projectiles/claw_0.png",
+        "projectiles/claw_1.png",
+        "projectiles/claw_2.png"
+      ],
+      "fps": 12
+    },
+    "heart": {
+      "label": "하트(마니)",
+      "frames": [
+        "projectiles/heart_0.png",
+        "projectiles/heart_1.png"
+      ],
+      "fps": 8
+    },
+    "bark_wave": {
+      "label": "짖음 파동(여름)",
+      "frames": [
+        "projectiles/bark_wave_0.png",
+        "projectiles/bark_wave_1.png",
+        "projectiles/bark_wave_2.png"
+      ],
+      "fps": 12
+    },
+    "hit_spark": {
+      "label": "피격 이펙트",
+      "frames": [
+        "projectiles/hit_spark_0.png",
+        "projectiles/hit_spark_1.png",
+        "projectiles/hit_spark_2.png",
+        "projectiles/hit_spark_3.png"
+      ],
+      "fps": 16
+    }
+  },
+  "ui": {
+    "grade_colors": {
+      "1": "#b8bcc6",
+      "2": "#4a90e2",
+      "3": "#a15be0",
+      "4": "#f2a830",
+      "5": "#f04a6a"
+    },
+    "grade_names": {
+      "1": "일반",
+      "2": "희귀",
+      "3": "영웅",
+      "4": "전설",
+      "5": "신화"
+    },
+    "note": "버튼 글자는 엔진에서 얹으세요(한글 폰트 자유 선택)."
+  },
+  "fx": {
+    "summon_poof": {
+      "label": "소환 연기",
+      "frames": [
+        "fx/summon_poof_0.png",
+        "fx/summon_poof_1.png",
+        "fx/summon_poof_2.png",
+        "fx/summon_poof_3.png",
+        "fx/summon_poof_4.png"
+      ],
+      "fps": 12
+    },
+    "merge_flash": {
+      "label": "합성 번쩍",
+      "frames": [
+        "fx/merge_flash_0.png",
+        "fx/merge_flash_1.png",
+        "fx/merge_flash_2.png",
+        "fx/merge_flash_3.png",
+        "fx/merge_flash_4.png"
+      ],
+      "fps": 14
+    },
+    "death_puff": {
+      "label": "적 처치 연기",
+      "frames": [
+        "fx/death_puff_0.png",
+        "fx/death_puff_1.png",
+        "fx/death_puff_2.png",
+        "fx/death_puff_3.png"
+      ],
+      "fps": 12
+    },
+    "coin_pop": {
+      "label": "코인 획득",
+      "frames": [
+        "fx/coin_pop_0.png",
+        "fx/coin_pop_1.png",
+        "fx/coin_pop_2.png",
+        "fx/coin_pop_3.png"
+      ],
+      "fps": 10
+    }
+  }
+}

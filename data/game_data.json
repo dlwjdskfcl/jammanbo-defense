@@ -1,0 +1,239 @@
+{
+  "rules": {
+    "start_coins": 100,
+    "summon_cost": 20,
+    "field_limit": 60,
+    "total_waves": 40,
+    "wave_seconds": 25,
+    "boss_every": 10,
+    "boss_time_limit": 60,
+    "boss_fast_sec": 30,
+    "boss_fast_bonus": 100,
+    "lucky_merge_chance": 0.05,
+    "pity_limit": 10,
+    "hp_growth": 1.12,
+    "count_base": 14,
+    "count_per_wave": 0.6,
+    "reward_growth": 0.08,
+    "sell_refund_g1": 10,
+    "sell_refund_g2": 30,
+    "sell_refund_g3": 90,
+    "sell_refund_g4": 270,
+    "sell_refund_g5": 800,
+    "projectile_speed": 420,
+    "boss_slow_resist": 0.5,
+    "max_attack_speed": 8
+  },
+  "grades": [
+    {
+      "grade": 1,
+      "name": "일반",
+      "color": "#b8bcc6",
+      "mult": 1.0
+    },
+    {
+      "grade": 2,
+      "name": "희귀",
+      "color": "#4a90e2",
+      "mult": 2.5
+    },
+    {
+      "grade": 3,
+      "name": "영웅",
+      "color": "#a15be0",
+      "mult": 7.0
+    },
+    {
+      "grade": 4,
+      "name": "전설",
+      "color": "#f2a830",
+      "mult": 20.0
+    },
+    {
+      "grade": 5,
+      "name": "신화",
+      "color": "#f04a6a",
+      "mult": 60.0
+    }
+  ],
+  "characters": {
+    "arr": {
+      "name": "아르",
+      "species": "cat",
+      "title": "뱅갈 × 코리안 숏헤어 · 수컷",
+      "bg": "#e9dfc4",
+      "stat": {
+        "damage": 12,
+        "interval": 0.55,
+        "range_tiles": 2.2,
+        "projectile": "claw",
+        "target": "first",
+        "effect": "none",
+        "effect_value": 0,
+        "effect_chance": 0,
+        "effect_time": 0,
+        "area_tiles": 0
+      }
+    },
+    "mani": {
+      "name": "마니",
+      "species": "cat",
+      "title": "코리안 숏헤어(턱시도) · 수컷",
+      "bg": "#d8dde6",
+      "stat": {
+        "damage": 9,
+        "interval": 0.8,
+        "range_tiles": 3,
+        "projectile": "heart",
+        "target": "random",
+        "effect": "slow",
+        "effect_value": 0.4,
+        "effect_chance": 0.35,
+        "effect_time": 1.5,
+        "area_tiles": 0
+      }
+    },
+    "yeoreum": {
+      "name": "여름",
+      "species": "dog",
+      "title": "보더콜리 × 진돗개 믹스 · 암컷",
+      "bg": "#f3dcc0",
+      "stat": {
+        "damage": 14,
+        "interval": 1.3,
+        "range_tiles": 2.6,
+        "projectile": "bark_wave",
+        "target": "first",
+        "effect": "stun",
+        "effect_value": 0,
+        "effect_chance": 0.18,
+        "effect_time": 0.7,
+        "area_tiles": 1
+      }
+    }
+  },
+  "enemies": {
+    "slime": {
+      "name": "물방울 슬라임",
+      "hp": 40,
+      "speed": 55,
+      "reward": 2,
+      "flying": false,
+      "boss": false
+    },
+    "stranger": {
+      "name": "낯선 남자",
+      "hp": 28,
+      "speed": 85,
+      "reward": 2,
+      "flying": false,
+      "boss": false
+    },
+    "robot_vac": {
+      "name": "로봇 청소기",
+      "hp": 120,
+      "speed": 38,
+      "reward": 4,
+      "flying": false,
+      "boss": false
+    },
+    "cloud": {
+      "name": "외로움 구름",
+      "hp": 50,
+      "speed": 60,
+      "reward": 3,
+      "flying": true,
+      "boss": false
+    },
+    "boss_vacuum": {
+      "name": "대왕 청소기",
+      "hp": 3000,
+      "speed": 32,
+      "reward": 150,
+      "flying": false,
+      "boss": true
+    },
+    "boss_stranger": {
+      "name": "수상한 거인",
+      "hp": 3000,
+      "speed": 55,
+      "reward": 200,
+      "flying": false,
+      "boss": true
+    }
+  },
+  "waves": [
+    {
+      "from": 1,
+      "to": 10,
+      "enemy": "slime",
+      "weight": 1
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "enemy": "slime",
+      "weight": 1
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "enemy": "stranger",
+      "weight": 1
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "enemy": "stranger",
+      "weight": 1
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "enemy": "robot_vac",
+      "weight": 1
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "enemy": "slime",
+      "weight": 1
+    },
+    {
+      "from": 31,
+      "to": 40,
+      "enemy": "robot_vac",
+      "weight": 1
+    },
+    {
+      "from": 31,
+      "to": 40,
+      "enemy": "cloud",
+      "weight": 1
+    },
+    {
+      "from": 31,
+      "to": 40,
+      "enemy": "stranger",
+      "weight": 1
+    }
+  ],
+  "bosses": {
+    "10": {
+      "enemy": "boss_vacuum",
+      "hp": 3000
+    },
+    "20": {
+      "enemy": "boss_stranger",
+      "hp": 15000
+    },
+    "30": {
+      "enemy": "boss_vacuum",
+      "hp": 60000
+    },
+    "40": {
+      "enemy": "boss_stranger",
+      "hp": 200000
+    }
+  }
+}
