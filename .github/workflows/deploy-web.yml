@@ -1,5 +1,6 @@
-# Godot 웹 빌드 → GitHub Pages 자동 배포 (무료). ※ 아직 실제 저장소에서 실행해 보지 않은 초안입니다.
-# 사용: 이 '게임' 폴더 내용을 GitHub 저장소 루트로 올리고, 저장소 Settings → Pages → Source 를 "GitHub Actions" 로 설정.
+# Godot 웹 빌드 → GitHub Pages 자동 배포 (무료).
+# 사용: 이 '게임' 폴더 내용이 저장소 루트. Settings → Pages → Source = "GitHub Actions".
+# main 에 push 하면 자동 실행. 수동 실행: Actions 탭 → deploy-web → Run workflow.
 name: deploy-web
 on:
   push:
@@ -11,36 +12,95 @@ permissions:
   pages: write
   id-token: write
 
+# 연달아 push 하면 앞선 배포는 취소하지 않고 순서대로(배포 도중 취소로 사이트가 깨지는 것 방지)
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 env:
   GODOT_VERSION: "4.7.2"
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - name: Godot + 내보내기 템플릿 설치
+      - uses: actions/checkout@v5
+
+      # Godot 본체(약 60MB) + 웹 템플릿만 캐시 (전체 템플릿 1.2GB 를 매번 받지 않음)
+      - name: Godot 캐시
+        id: cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/godot-bin
+            ~/.local/share/godot/export_templates
+          key: godot-${{ env.GODOT_VERSION }}-web-v1
+
+      - name: Godot + 웹 내보내기 템플릿 설치
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          wget -q https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip
-          wget -q https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz
-          unzip -q Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip
-          mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
-          unzip -q Godot_v${GODOT_VERSION}-stable_export_templates.tpz -d /tmp/tpl
-          mv /tmp/tpl/templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/
-      - name: 에셋 가져오기 + 웹 내보내기
+          set -e
+          BASE=https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable
+          wget -q $BASE/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip
+          wget -q $BASE/Godot_v${GODOT_VERSION}-stable_export_templates.tpz
+          mkdir -p ~/godot-bin
+          unzip -q -o Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip -d ~/godot-bin
+          T=~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          mkdir -p $T
+          unzip -q -o -j Godot_v${GODOT_VERSION}-stable_export_templates.tpz 'templates/web_*' 'templates/version.txt' -d $T
+          rm -f *.zip *.tpz
+
+      - name: 빌드 번호 주입
+        run: |
+          BUILD="${GITHUB_RUN_NUMBER}-${GITHUB_SHA::7}"
+          DATE=$(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')
+          sed -i "s|__BUILD__|${BUILD}|; s|__DATE__|${DATE}|" web/shell.html
+          echo "BUILD=${BUILD}" >> "$GITHUB_ENV"
+          echo "DATE=${DATE}" >> "$GITHUB_ENV"
+          echo "빌드 ${BUILD} (${DATE})"
+
+      - name: 에셋 가져오기 (--import)
+        run: |
+          chmod +x ~/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64
+          # --import 는 정상이어도 0 이 아닌 값으로 끝나는 경우가 있어 종료 코드는 무시하고, 로그의 오류 문구로 판단
+          ~/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64 --headless --import 2>&1 | tee import.log || true
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" import.log; then
+            echo "::error::스크립트 오류가 있어요. 위 로그에서 'SCRIPT ERROR' / 'Parse Error' 줄을 확인하세요 (Godot 에서 ▶ 로 먼저 실행해 보세요)."
+            exit 1
+          fi
+
+      - name: 웹 내보내기
         run: |
           mkdir -p build
-          ./Godot_v${GODOT_VERSION}-stable_linux.x86_64 --headless --import || true
-          ./Godot_v${GODOT_VERSION}-stable_linux.x86_64 --headless --export-release "Web" build/index.html
-      - uses: actions/upload-pages-artifact@v3
+          ~/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64 --headless --export-release "Web" build/index.html 2>&1 | tee export.log || true
+          # 내보내기 실패도 종료 코드가 0 일 수 있어 결과 파일로 확인
+          for f in index.html index.js index.wasm index.pck index.manifest.json index.service.worker.js; do
+            [ -s build/$f ] || { echo "::error::build/$f 가 없어요. 위 로그를 확인하세요 (export_presets.cfg · 내보내기 템플릿 버전 ${GODOT_VERSION})."; exit 1; }
+          done
+          grep -q "$BUILD" build/index.html || { echo "::error::빌드 번호가 index.html 에 들어가지 않았어요(web/shell.html 확인)."; exit 1; }
+          # 홈 화면 아이콘 · robots.txt 복사
+          cp web/static/* build/
+          # 새 서비스 워커가 곧바로 '업데이트' 요청을 받을 수 있게 하는 것은 shell.html 이 담당(서비스 워커 파일은 수정하지 않음)
+          echo "{\"build\":\"${BUILD}\",\"date\":\"${DATE}\"}" > build/version.json
+          ls -l build
+          {
+            echo "### 빌드 ${BUILD}"
+            echo "- 시각: ${DATE}"
+            echo "- wasm: $(du -h build/index.wasm | cut -f1), pck: $(du -h build/index.pck | cut -f1)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: build
+
   deploy:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

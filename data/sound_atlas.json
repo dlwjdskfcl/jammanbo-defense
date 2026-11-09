@@ -116,9 +116,9 @@
     },
     "boss_warning": {
       "file": "sfx/boss_warning.wav",
-      "label": "보스 경고",
+      "label": "보스 경고(사이렌+쿵)",
       "usage": "보스 등장 전",
-      "seconds": 0.96,
+      "seconds": 1.68,
       "loop": false
     },
     "life_lost": {
@@ -212,6 +212,62 @@
       "seconds": 0.2,
       "loop": false
     },
+    "drag_pick": {
+      "file": "sfx/drag_pick.wav",
+      "label": "유닛 집기(드래그 시작)",
+      "usage": "유닛 드래그 시작",
+      "seconds": 0.07,
+      "loop": false
+    },
+    "drag_drop": {
+      "file": "sfx/drag_drop.wav",
+      "label": "유닛 놓기(드롭)",
+      "usage": "유닛 드래그 끝/자리 이동",
+      "seconds": 0.1,
+      "loop": false
+    },
+    "popup_open": {
+      "file": "sfx/popup_open.wav",
+      "label": "팝업 열기",
+      "usage": "팝업/패널 열림",
+      "seconds": 0.16,
+      "loop": false
+    },
+    "popup_close": {
+      "file": "sfx/popup_close.wav",
+      "label": "팝업 닫기",
+      "usage": "팝업/패널 닫힘",
+      "seconds": 0.16,
+      "loop": false
+    },
+    "card_flip": {
+      "file": "sfx/card_flip.wav",
+      "label": "카드 뒤집기",
+      "usage": "카드 성장/가챠 카드",
+      "seconds": 0.15,
+      "loop": false
+    },
+    "level_up": {
+      "file": "sfx/level_up.wav",
+      "label": "레벨 업(카드 성장)",
+      "usage": "카드 레벨 상승",
+      "seconds": 0.82,
+      "loop": false
+    },
+    "mythic_summon": {
+      "file": "sfx/mythic_summon.wav",
+      "label": "신화 소환 팡파르",
+      "usage": "신화 등급 소환/합성 성공",
+      "seconds": 1.84,
+      "loop": false
+    },
+    "toast": {
+      "file": "sfx/toast.wav",
+      "label": "토스트 알림",
+      "usage": "작은 안내 메시지",
+      "seconds": 0.14,
+      "loop": false
+    },
     "bgm_menu": {
       "file": "bgm/bgm_menu.wav",
       "label": "타이틀/로비 BGM (밝고 느긋)",
@@ -253,6 +309,14 @@
     "button": "click",
     "no_coin": "error",
     "win": "victory",
-    "lose": "defeat"
+    "lose": "defeat",
+    "drag_pick": "drag_pick",
+    "drag_drop": "drag_drop",
+    "popup_open": "popup_open",
+    "popup_close": "popup_close",
+    "card_flip": "card_flip",
+    "level_up": "level_up",
+    "mythic_summon": "mythic_summon",
+    "toast": "toast"
   }
 }

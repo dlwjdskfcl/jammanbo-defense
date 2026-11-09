@@ -22,7 +22,8 @@
     "sell_refund_g5": 800,
     "projectile_speed": 420,
     "boss_slow_resist": 0.5,
-    "max_attack_speed": 8
+    "max_attack_speed": 8,
+    "clear_next_wave_sec": 3
   },
   "grades": [
     {
@@ -160,6 +161,102 @@
       "reward": 200,
       "flying": false,
       "boss": true
+    },
+    "parcel": {
+      "name": "택배 상자",
+      "hp": 45,
+      "speed": 50,
+      "reward": 2,
+      "flying": false,
+      "boss": false
+    },
+    "doorbell": {
+      "name": "초인종",
+      "hp": 24,
+      "speed": 90,
+      "reward": 2,
+      "flying": false,
+      "boss": false
+    },
+    "thunder_cloud": {
+      "name": "천둥 구름",
+      "hp": 55,
+      "speed": 60,
+      "reward": 3,
+      "flying": true,
+      "boss": false
+    },
+    "firework": {
+      "name": "불꽃놀이 폭죽",
+      "hp": 30,
+      "speed": 95,
+      "reward": 2,
+      "flying": false,
+      "boss": false
+    },
+    "dryer": {
+      "name": "드라이기",
+      "hp": 70,
+      "speed": 58,
+      "reward": 3,
+      "flying": false,
+      "boss": false
+    },
+    "clipper": {
+      "name": "이발기",
+      "hp": 60,
+      "speed": 70,
+      "reward": 3,
+      "flying": false,
+      "boss": false
+    },
+    "syringe": {
+      "name": "주사기",
+      "hp": 80,
+      "speed": 48,
+      "reward": 3,
+      "flying": false,
+      "boss": false
+    },
+    "moving_box": {
+      "name": "이삿짐 박스",
+      "hp": 150,
+      "speed": 34,
+      "reward": 5,
+      "flying": false,
+      "boss": false
+    },
+    "elite_storm": {
+      "name": "먹구름 대장(정예)",
+      "hp": 450,
+      "speed": 45,
+      "reward": 12,
+      "flying": true,
+      "boss": false
+    },
+    "elite_mover": {
+      "name": "이삿짐 수레(정예)",
+      "hp": 700,
+      "speed": 28,
+      "reward": 15,
+      "flying": false,
+      "boss": false
+    },
+    "boss_thunder": {
+      "name": "천둥 대왕구름",
+      "hp": 3000,
+      "speed": 45,
+      "reward": 180,
+      "flying": false,
+      "boss": true
+    },
+    "boss_hospital": {
+      "name": "대왕 주사기",
+      "hp": 3000,
+      "speed": 38,
+      "reward": 180,
+      "flying": false,
+      "boss": true
     }
   },
   "waves": [
@@ -216,6 +313,108 @@
       "to": 40,
       "enemy": "stranger",
       "weight": 1
+    },
+    {
+      "from": 5,
+      "to": 10,
+      "enemy": "parcel",
+      "weight": 0.5
+    },
+    {
+      "from": 8,
+      "to": 10,
+      "enemy": "doorbell",
+      "weight": 0.4
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "enemy": "parcel",
+      "weight": 0.5
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "enemy": "doorbell",
+      "weight": 0.5
+    },
+    {
+      "from": 14,
+      "to": 20,
+      "enemy": "thunder_cloud",
+      "weight": 0.4
+    },
+    {
+      "from": 16,
+      "to": 20,
+      "enemy": "firework",
+      "weight": 0.5
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "enemy": "dryer",
+      "weight": 0.7
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "enemy": "clipper",
+      "weight": 0.6
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "enemy": "thunder_cloud",
+      "weight": 0.4
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "enemy": "firework",
+      "weight": 0.4
+    },
+    {
+      "from": 25,
+      "to": 30,
+      "enemy": "elite_storm",
+      "weight": 0.12
+    },
+    {
+      "from": 31,
+      "to": 40,
+      "enemy": "syringe",
+      "weight": 0.8
+    },
+    {
+      "from": 31,
+      "to": 40,
+      "enemy": "moving_box",
+      "weight": 0.5
+    },
+    {
+      "from": 31,
+      "to": 40,
+      "enemy": "dryer",
+      "weight": 0.4
+    },
+    {
+      "from": 31,
+      "to": 40,
+      "enemy": "clipper",
+      "weight": 0.4
+    },
+    {
+      "from": 33,
+      "to": 40,
+      "enemy": "elite_storm",
+      "weight": 0.12
+    },
+    {
+      "from": 33,
+      "to": 40,
+      "enemy": "elite_mover",
+      "weight": 0.12
     }
   ],
   "bosses": {
@@ -234,6 +433,174 @@
     "40": {
       "enemy": "boss_stranger",
       "hp": 200000
+    }
+  },
+  "cards": {
+    "levels": [
+      {
+        "level": 1,
+        "cost": 5,
+        "mult": 1.0
+      },
+      {
+        "level": 2,
+        "cost": 5,
+        "mult": 1.06
+      },
+      {
+        "level": 3,
+        "cost": 10,
+        "mult": 1.12
+      },
+      {
+        "level": 4,
+        "cost": 15,
+        "mult": 1.18
+      },
+      {
+        "level": 5,
+        "cost": 25,
+        "mult": 1.24
+      },
+      {
+        "level": 6,
+        "cost": 35,
+        "mult": 1.4
+      },
+      {
+        "level": 7,
+        "cost": 50,
+        "mult": 1.46
+      },
+      {
+        "level": 8,
+        "cost": 65,
+        "mult": 1.52
+      },
+      {
+        "level": 9,
+        "cost": 85,
+        "mult": 1.58
+      },
+      {
+        "level": 10,
+        "cost": 105,
+        "mult": 1.64
+      },
+      {
+        "level": 11,
+        "cost": 130,
+        "mult": 1.7
+      },
+      {
+        "level": 12,
+        "cost": 155,
+        "mult": 1.91
+      },
+      {
+        "level": 13,
+        "cost": 180,
+        "mult": 1.97
+      },
+      {
+        "level": 14,
+        "cost": 215,
+        "mult": 2.03
+      },
+      {
+        "level": 15,
+        "cost": 0,
+        "mult": 2.09
+      }
+    ],
+    "skills": {
+      "arr": [
+        {
+          "tier": 0,
+          "skill": "arr_swat",
+          "unlock": 1,
+          "name": "냥펀치",
+          "desc": "발톱 연타",
+          "icon": "arr_swat.png"
+        },
+        {
+          "tier": 1,
+          "skill": "arr_instinct",
+          "unlock": 6,
+          "name": "겁쟁이 본능",
+          "desc": "적이 가까울수록 공격속도 증가, 가끔 회피",
+          "icon": "arr_instinct.png"
+        },
+        {
+          "tier": 2,
+          "skill": "arr_dodge",
+          "unlock": 12,
+          "name": "재빠른 회피",
+          "desc": "피해 무시 확률",
+          "icon": "arr_dodge.png"
+        }
+      ],
+      "mani": [
+        {
+          "tier": 0,
+          "skill": "mani_charm",
+          "unlock": 1,
+          "name": "하트 매혹",
+          "desc": "맞은 적 이동속도 감소",
+          "icon": "mani_charm.png"
+        },
+        {
+          "tier": 1,
+          "skill": "mani_free",
+          "unlock": 6,
+          "name": "자유로운 영혼",
+          "desc": "매번 랜덤 적을 공격",
+          "icon": "mani_free.png"
+        },
+        {
+          "tier": 2,
+          "skill": "mani_doglike",
+          "unlock": 12,
+          "name": "개냥이",
+          "desc": "아군 근처에서 버프",
+          "icon": "mani_doglike.png"
+        }
+      ],
+      "yeoreum": [
+        {
+          "tier": 0,
+          "skill": "yeo_bark",
+          "unlock": 1,
+          "name": "짖음 파동",
+          "desc": "범위 공격 + 스턴 확률",
+          "icon": "yeo_bark.png"
+        },
+        {
+          "tier": 1,
+          "skill": "yeo_smart",
+          "unlock": 6,
+          "name": "똑쟁이",
+          "desc": "약점 공격 추가 피해",
+          "icon": "yeo_smart.png"
+        },
+        {
+          "tier": 2,
+          "skill": "yeo_lonely",
+          "unlock": 12,
+          "name": "외로움",
+          "desc": "인접 아군 없으면 공격력, 있으면 사거리",
+          "icon": "yeo_lonely.png"
+        }
+      ]
+    },
+    "meta": {
+      "shards_base": 2,
+      "shards_per_wave": 1,
+      "shards_per_30kills": 1,
+      "shards_win_bonus": 30,
+      "shards_new_best_bonus": 15,
+      "shards_cap": 100,
+      "daily_bonus": 10
     }
   }
 }

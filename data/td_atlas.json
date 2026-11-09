@@ -402,6 +402,186 @@
         96
       ],
       "note": "보스 · 빠른 보스"
+    },
+    "parcel": {
+      "label": "택배 상자",
+      "frames": [
+        "enemies/parcel_0.png",
+        "enemies/parcel_1.png",
+        "enemies/parcel_2.png",
+        "enemies/parcel_3.png"
+      ],
+      "fps": 8,
+      "size": [
+        48,
+        48
+      ],
+      "note": "일반 · 통통 튐 · 세트1"
+    },
+    "doorbell": {
+      "label": "초인종",
+      "frames": [
+        "enemies/doorbell_0.png",
+        "enemies/doorbell_1.png",
+        "enemies/doorbell_2.png",
+        "enemies/doorbell_3.png"
+      ],
+      "fps": 8,
+      "size": [
+        48,
+        48
+      ],
+      "note": "빠름 · 약함 · 세트1"
+    },
+    "thunder_cloud": {
+      "label": "천둥 구름",
+      "frames": [
+        "enemies/thunder_cloud_0.png",
+        "enemies/thunder_cloud_1.png",
+        "enemies/thunder_cloud_2.png",
+        "enemies/thunder_cloud_3.png"
+      ],
+      "fps": 6,
+      "size": [
+        48,
+        48
+      ],
+      "note": "공중 · 번쩍 · 세트2"
+    },
+    "firework": {
+      "label": "불꽃놀이 폭죽",
+      "frames": [
+        "enemies/firework_0.png",
+        "enemies/firework_1.png",
+        "enemies/firework_2.png",
+        "enemies/firework_3.png"
+      ],
+      "fps": 10,
+      "size": [
+        48,
+        48
+      ],
+      "note": "빠름 · 약함 · 세트2"
+    },
+    "dryer": {
+      "label": "드라이기",
+      "frames": [
+        "enemies/dryer_0.png",
+        "enemies/dryer_1.png",
+        "enemies/dryer_2.png",
+        "enemies/dryer_3.png"
+      ],
+      "fps": 8,
+      "size": [
+        48,
+        48
+      ],
+      "note": "단단함 보통 · 세트3"
+    },
+    "clipper": {
+      "label": "이발기",
+      "frames": [
+        "enemies/clipper_0.png",
+        "enemies/clipper_1.png",
+        "enemies/clipper_2.png",
+        "enemies/clipper_3.png"
+      ],
+      "fps": 10,
+      "size": [
+        48,
+        48
+      ],
+      "note": "빠름 보통 · 세트3"
+    },
+    "syringe": {
+      "label": "주사기",
+      "frames": [
+        "enemies/syringe_0.png",
+        "enemies/syringe_1.png",
+        "enemies/syringe_2.png",
+        "enemies/syringe_3.png"
+      ],
+      "fps": 8,
+      "size": [
+        48,
+        48
+      ],
+      "note": "단단함 보통 · 세트4"
+    },
+    "moving_box": {
+      "label": "이삿짐 박스",
+      "frames": [
+        "enemies/moving_box_0.png",
+        "enemies/moving_box_1.png",
+        "enemies/moving_box_2.png",
+        "enemies/moving_box_3.png"
+      ],
+      "fps": 6,
+      "size": [
+        48,
+        48
+      ],
+      "note": "탱커 · 느림 · 세트4"
+    },
+    "elite_storm": {
+      "label": "먹구름 대장(정예)",
+      "frames": [
+        "enemies/elite_storm_0.png",
+        "enemies/elite_storm_1.png",
+        "enemies/elite_storm_2.png",
+        "enemies/elite_storm_3.png"
+      ],
+      "fps": 6,
+      "size": [
+        64,
+        64
+      ],
+      "note": "정예 · 공중 · 단단함"
+    },
+    "elite_mover": {
+      "label": "이삿짐 수레(정예)",
+      "frames": [
+        "enemies/elite_mover_0.png",
+        "enemies/elite_mover_1.png",
+        "enemies/elite_mover_2.png",
+        "enemies/elite_mover_3.png"
+      ],
+      "fps": 5,
+      "size": [
+        64,
+        64
+      ],
+      "note": "정예 · 매우 느림 · 매우 단단함"
+    },
+    "boss_thunder": {
+      "label": "천둥 대왕구름(보스)",
+      "frames": [
+        "enemies/boss_thunder_0.png",
+        "enemies/boss_thunder_1.png",
+        "enemies/boss_thunder_2.png",
+        "enemies/boss_thunder_3.png"
+      ],
+      "fps": 6,
+      "size": [
+        96,
+        96
+      ],
+      "note": "보스 · 번개 · 세트2 후보"
+    },
+    "boss_hospital": {
+      "label": "대왕 주사기(보스)",
+      "frames": [
+        "enemies/boss_hospital_0.png",
+        "enemies/boss_hospital_1.png",
+        "enemies/boss_hospital_2.png",
+        "enemies/boss_hospital_3.png"
+      ],
+      "fps": 6,
+      "size": [
+        96,
+        96
+      ],
+      "note": "보스 · 병원 · 세트4 후보"
     }
   },
   "projectiles": {
@@ -499,6 +679,127 @@
         "fx/coin_pop_1.png",
         "fx/coin_pop_2.png",
         "fx/coin_pop_3.png"
+      ],
+      "fps": 10
+    },
+    "merge_up_g2": {
+      "label": "합성 승급 2성(희귀)",
+      "frames": [
+        "fx/merge_up_g2_0.png",
+        "fx/merge_up_g2_1.png",
+        "fx/merge_up_g2_2.png",
+        "fx/merge_up_g2_3.png",
+        "fx/merge_up_g2_4.png",
+        "fx/merge_up_g2_5.png"
+      ],
+      "fps": 14
+    },
+    "merge_up_g3": {
+      "label": "합성 승급 3성(영웅)",
+      "frames": [
+        "fx/merge_up_g3_0.png",
+        "fx/merge_up_g3_1.png",
+        "fx/merge_up_g3_2.png",
+        "fx/merge_up_g3_3.png",
+        "fx/merge_up_g3_4.png",
+        "fx/merge_up_g3_5.png"
+      ],
+      "fps": 14
+    },
+    "merge_up_g4": {
+      "label": "합성 승급 4성(전설)",
+      "frames": [
+        "fx/merge_up_g4_0.png",
+        "fx/merge_up_g4_1.png",
+        "fx/merge_up_g4_2.png",
+        "fx/merge_up_g4_3.png",
+        "fx/merge_up_g4_4.png",
+        "fx/merge_up_g4_5.png"
+      ],
+      "fps": 14
+    },
+    "merge_up_g5": {
+      "label": "합성 승급 5성(신화)",
+      "frames": [
+        "fx/merge_up_g5_0.png",
+        "fx/merge_up_g5_1.png",
+        "fx/merge_up_g5_2.png",
+        "fx/merge_up_g5_3.png",
+        "fx/merge_up_g5_4.png",
+        "fx/merge_up_g5_5.png"
+      ],
+      "fps": 14
+    },
+    "merge_up_jump": {
+      "label": "대박(2단계 점프) 합성",
+      "frames": [
+        "fx/merge_up_jump_0.png",
+        "fx/merge_up_jump_1.png",
+        "fx/merge_up_jump_2.png",
+        "fx/merge_up_jump_3.png",
+        "fx/merge_up_jump_4.png",
+        "fx/merge_up_jump_5.png",
+        "fx/merge_up_jump_6.png",
+        "fx/merge_up_jump_7.png"
+      ],
+      "fps": 14
+    },
+    "mythic_summon": {
+      "label": "신화 소환",
+      "frames": [
+        "fx/mythic_summon_0.png",
+        "fx/mythic_summon_1.png",
+        "fx/mythic_summon_2.png",
+        "fx/mythic_summon_3.png",
+        "fx/mythic_summon_4.png",
+        "fx/mythic_summon_5.png",
+        "fx/mythic_summon_6.png",
+        "fx/mythic_summon_7.png"
+      ],
+      "fps": 12
+    },
+    "death_star": {
+      "label": "처치: 별 터짐",
+      "frames": [
+        "fx/death_star_0.png",
+        "fx/death_star_1.png",
+        "fx/death_star_2.png",
+        "fx/death_star_3.png",
+        "fx/death_star_4.png"
+      ],
+      "fps": 12
+    },
+    "death_confetti": {
+      "label": "처치: 색종이",
+      "frames": [
+        "fx/death_confetti_0.png",
+        "fx/death_confetti_1.png",
+        "fx/death_confetti_2.png",
+        "fx/death_confetti_3.png",
+        "fx/death_confetti_4.png"
+      ],
+      "fps": 12
+    },
+    "death_boom": {
+      "label": "처치: 펑",
+      "frames": [
+        "fx/death_boom_0.png",
+        "fx/death_boom_1.png",
+        "fx/death_boom_2.png",
+        "fx/death_boom_3.png",
+        "fx/death_boom_4.png"
+      ],
+      "fps": 14
+    },
+    "boss_explode": {
+      "label": "보스 처치 대폭발",
+      "frames": [
+        "fx/boss_explode_0.png",
+        "fx/boss_explode_1.png",
+        "fx/boss_explode_2.png",
+        "fx/boss_explode_3.png",
+        "fx/boss_explode_4.png",
+        "fx/boss_explode_5.png"
       ],
       "fps": 10
     }

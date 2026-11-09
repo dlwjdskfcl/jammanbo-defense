@@ -19,6 +19,7 @@ config/icon="res://assets/icon.png"
 
 Data="*res://scripts/data.gd"
 Sfx="*res://scripts/sfx.gd"
+Save="*res://scripts/save.gd"
 
 [display]
 
@@ -28,6 +29,7 @@ window/size/window_width_override=450
 window/size/window_height_override=800
 window/stretch/mode="canvas_items"
 window/handheld/orientation=1
+window/energy_saving/keep_screen_on=true
 
 [gui]
 
@@ -39,3 +41,4 @@ textures/canvas_textures/default_texture_filter=0
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 2d/snap/snap_2d_transforms_to_pixel=true
+environment/defaults/default_clear_color=Color(0.105882, 0.101961, 0.180392, 1)

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>$GODOT_PROJECT_NAME</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#1b1a2e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="아르마니여름">
+<meta name="format-detection" content="telephone=no">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%;width:100%;background:#1b1a2e;color:#f4ecd8;overflow:hidden;overscroll-behavior:none;
+  touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+#canvas{display:block;position:fixed;inset:0;width:100%;height:100%;outline:none;background:#1b1a2e}
+#canvas:focus{outline:none}
+.layer{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  padding:env(safe-area-inset-top) 24px env(safe-area-inset-bottom);text-align:center;background:#1b1a2e;z-index:10}
+.layer.hide{display:none}
+#splash img{width:min(60vw,260px);image-rendering:pixelated}
+#splash h1{margin:0;font-size:22px;letter-spacing:.5px}
+#splash p{margin:0;font-size:14px;opacity:.75}
+#bar{width:min(70vw,300px);height:10px;border:2px solid #f4ecd8;border-radius:6px;overflow:hidden}
+#bar i{display:block;height:100%;width:0;background:#ffb347;transition:width .15s}
+#start{font:inherit;font-size:20px;font-weight:bold;color:#1b1a2e;background:#ffb347;border:0;border-radius:12px;padding:14px 36px;touch-action:manipulation}
+#start[hidden]{display:none}
+#note{font-size:12px;opacity:.6;max-width:320px;line-height:1.5}
+#fail{color:#ff8a8a;font-size:15px;line-height:1.6;max-width:340px;white-space:pre-line}
+#rotate{z-index:30;display:none;font-size:18px;background:rgba(27,26,46,.96)}
+@media (orientation:landscape) and (max-height:520px) and (pointer:coarse){#rotate{display:flex}}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);transform:translateX(-50%);z-index:40;
+  background:rgba(0,0,0,.85);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;max-width:88vw;display:none;text-align:center}
+#toast button{font:inherit;margin-left:10px;border:0;border-radius:6px;padding:4px 10px;background:#ffb347;color:#1b1a2e}
+#dbg{position:fixed;left:0;right:0;bottom:0;max-height:34vh;overflow:auto;z-index:50;background:rgba(0,0,0,.82);color:#9fffa0;
+  font:11px/1.35 monospace;padding:4px 6px;display:none;white-space:pre-wrap;word-break:break-all;-webkit-user-select:text;user-select:text;touch-action:pan-y}
+#dbg .e{color:#ff8a8a}
+</style>
+$GODOT_HEAD_INCLUDE
+</head>
+<body>
+<canvas id="canvas">이 브라우저는 게임을 실행할 수 없어요. (HTML5 canvas 미지원)</canvas>
+
+<div id="splash" class="layer">
+  <img src="index.512x512.png" alt="">
+  <h1>아르마니여름 랜덤 디펜스</h1>
+  <p id="msg">게임을 내려받는 중… 처음 한 번만 오래 걸려요</p>
+  <div id="bar"><i></i></div>
+  <button id="start" hidden>터치해서 시작</button>
+  <div id="note"></div>
+  <div id="fail"></div>
+</div>
+<div id="rotate" class="layer">📱 폰을 세로로 돌려 주세요</div>
+<div id="toast"></div>
+<pre id="dbg"></pre>
+
+<script src="$GODOT_URL"></script>
+<script>
+(function () {
+'use strict';
+var BUILD = '__BUILD__', BUILD_DATE = '__DATE__';
+var $ = function (id) { return document.getElementById(id); };
+var debug = /[?&]debug=1/.test(location.search);
+var logEl = $('dbg'), logBuf = [];
+console.info('[아르마니여름] build ' + BUILD + ' (' + BUILD_DATE + ')');
+window.GAME_BUILD = { build: BUILD, date: BUILD_DATE };
+
+function log(msg, isErr) {
+  logBuf.push((isErr ? '! ' : '') + msg);
+  if (logBuf.length > 80) logBuf.shift();
+  if (debug) {
+    logEl.style.display = 'block';
+    logEl.innerHTML = '';
+    logBuf.forEach(function (l) {
+      var d = document.createElement('div'); if (l[0] === '!') d.className = 'e';
+      d.textContent = l; logEl.appendChild(d);
+    });
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+}
+if (debug) log('build ' + BUILD + ' ' + BUILD_DATE + ' / ' + navigator.userAgent);
+window.addEventListener('error', function (e) { log('JS 오류: ' + e.message + ' @' + (e.filename || '').split('/').pop() + ':' + e.lineno, true); });
+window.addEventListener('unhandledrejection', function (e) { log('Promise 오류: ' + (e.reason && e.reason.message || e.reason), true); });
+if (debug) {
+  var frames = 0, last = performance.now();
+  (function tick(t) { frames++; if (t - last >= 2000) { log('FPS ' + Math.round(frames * 1000 / (t - last))); frames = 0; last = t; } requestAnimationFrame(tick); })(last);
+}
+
+var toastTimer;
+function toast(text, html) {
+  var t = $('toast'); if (html) { t.innerHTML = ''; t.appendChild(html); } else t.textContent = text;
+  t.style.display = 'block'; clearTimeout(toastTimer);
+  if (!html) toastTimer = setTimeout(function () { t.style.display = 'none'; }, 2500);
+}
+function fail(text) {
+  $('splash').classList.remove('hide'); $('bar').style.display = 'none'; $('start').hidden = true;
+  $('msg').textContent = ''; $('fail').textContent = text; log(text, true);
+}
+
+// 핀치 줌 · 더블탭 확대 · 길게 눌러 메뉴 방지
+['gesturestart', 'gesturechange', 'gestureend'].forEach(function (n) { document.addEventListener(n, function (e) { e.preventDefault(); }); });
+document.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+document.addEventListener('touchmove', function (e) { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+
+// 저장(IndexedDB) 가능 여부 — 시크릿 모드 등에서 진행이 저장되지 않을 수 있음
+try {
+  var req = indexedDB.open('__armani_probe__');
+  req.onerror = function () { $('note').textContent = '⚠ 이 브라우저는 저장이 막혀 있어요(시크릿 모드?). 진행 상황이 저장되지 않을 수 있어요.'; log('IndexedDB 불가', true); };
+  req.onsuccess = function () { req.result.close(); try { indexedDB.deleteDatabase('__armani_probe__'); } catch (e) {} };
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {});
+} catch (e) { $('note').textContent = '⚠ 저장 기능을 쓸 수 없어요. 진행 상황이 저장되지 않을 수 있어요.'; }
+
+var GODOT_CONFIG = $GODOT_CONFIG;
+var engine = new Engine(GODOT_CONFIG);
+
+var missing = Engine.getMissingFeatures({ threads: false });
+if (missing.length) {
+  fail('이 브라우저에서는 실행할 수 없어요.\n최신 Chrome / Safari / Edge 로 열어 주세요.\n(부족한 기능: ' + missing.join(', ') + ')');
+  return;
+}
+
+var wake = null;
+function keepAwake() {
+  if (!('wakeLock' in navigator)) return;
+  navigator.wakeLock.request('screen').then(function (l) { wake = l; l.addEventListener('release', function () { wake = null; }); }).catch(function () {});
+}
+document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && !wake && started) keepAwake(); });
+
+// 뒤로가기: 실수로 게임을 나가지 않게 한 번 막고, 2초 안에 한 번 더 누르면 나감
+var started = false, lastBack = 0;
+function armBack() { try { history.pushState({ g: 1 }, ''); } catch (e) {} }
+window.addEventListener('popstate', function () {
+  if (!started) return;
+  var now = Date.now();
+  if (now - lastBack < 2000) { history.back(); return; }
+  lastBack = now; armBack(); toast('한 번 더 누르면 나가요');
+});
+
+function onProgress(cur, total) {
+  var p = total > 0 ? Math.min(100, Math.round(cur / total * 100)) : 0;
+  $('bar').firstElementChild.style.width = p + '%';
+  if (total > 0) $('msg').textContent = '게임을 내려받는 중… ' + p + '% (' + (cur / 1048576).toFixed(1) + ' / ' + (total / 1048576).toFixed(1) + ' MB)';
+}
+
+// 1단계: 엔진(.wasm)+게임 데이터(.pck) 내려받기 → 2단계: '터치해서 시작'(소리·전체화면·화면 유지는 터치 뒤에만 허용) → 게임 시작
+GODOT_CONFIG.onProgress = onProgress;
+var PACK = GODOT_CONFIG.executable + '.pck';
+Promise.all([engine.init(GODOT_CONFIG.executable), engine.preloadFile(PACK, PACK)]).then(function () {
+  $('bar').firstElementChild.style.width = '100%';
+  $('msg').textContent = '준비 완료!';
+  var b = $('start'); b.hidden = false;
+  return new Promise(function (res) { b.addEventListener('click', function () { b.hidden = true; res(); }, { once: true }); });
+}).then(function () {
+  $('msg').textContent = '게임을 여는 중…';
+  keepAwake();
+  try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock('portrait').catch(function () {}); } catch (e) {}
+  started = true; armBack();
+  return engine.start({
+    args: ['--main-pack', PACK],
+    onPrint: function () { var a = Array.prototype.slice.call(arguments).join(' '); console.log(a); if (debug) log(a); },
+    onPrintError: function () { var a = Array.prototype.slice.call(arguments).join(' '); console.error(a); log(a, true); }
+  });
+}).then(function () {
+  $('splash').classList.add('hide');
+  $('canvas').focus();
+  engine.installServiceWorker().then(watchUpdate).catch(function (e) { log('서비스 워커: ' + e, true); });
+}).catch(function (err) {
+  fail('게임을 시작하지 못했어요.\n새로고침 해 보세요. 계속 안 되면 주소 끝에 ?debug=1 을 붙여 오류를 확인하세요.\n\n' + (err && err.message || err));
+});
+
+// 새 버전 알림: 새 서비스 워커가 설치되면(= 새로 배포됨) '업데이트' 버튼을 보여 줌. 눌러야만 바뀜(플레이 중 갑자기 새로고침 금지)
+function watchUpdate(reg) {
+  if (!reg) return;
+  function offer(w) {
+    var s = document.createElement('span'); s.textContent = '새 버전이 있어요 ';
+    var b = document.createElement('button'); b.textContent = '업데이트';
+    b.onclick = function () { try { w.postMessage('update'); } catch (e) { location.reload(); } };
+    s.appendChild(b); toast('', s);
+  }
+  if (reg.waiting && navigator.serviceWorker.controller) offer(reg.waiting);
+  reg.addEventListener('updatefound', function () {
+    var w = reg.installing; if (!w) return;
+    w.addEventListener('statechange', function () { if (w.state === 'installed' && navigator.serviceWorker.controller) offer(w); });
+  });
+  setInterval(function () { reg.update().catch(function () {}); }, 10 * 60 * 1000);
+}
+})();
+</script>
+</body>
+</html>
