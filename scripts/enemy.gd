@@ -23,6 +23,9 @@ var flash_t: float = 0.0
 var badges: Node2D
 var _bar_w: float = 26.0
 var _bar_y: float = -34.0
+var mark_t: float = 0.0     # 룰북 표식: 받는 피해 증가 남은 시간
+var mark_v: float = 0.0
+var killer = null          # 마지막으로 때린 유닛(coin_kill 판정)
 var _tint: int = 0   # 0 보통 1 둔화 2 피격
 
 
@@ -59,10 +62,16 @@ func _process(delta: float) -> void:
 		return
 	if slow_t > 0.0:
 		slow_t -= delta
+	if mark_t > 0.0:
+		mark_t -= delta
 	if stun_t > 0.0:
 		stun_t -= delta
+	elif game.freeze_t > 0.0 and not (boss and game.freeze_t <= game.freeze_total * 0.5):
+		pass     # 모래시계 이벤트: 정지(보스는 절반만)
 	else:
 		var sp := speed * (slow_f if slow_t > 0.0 else 1.0)
+		if game.global_slow_t > 0.0:
+			sp *= 1.0 - game.global_slow_f
 		dist += sp * delta
 	position = game.path_pos(dist)
 	if abs(position.x - _last_x) > 0.01:
@@ -85,6 +94,8 @@ func _process(delta: float) -> void:
 func take_hit(dmg: float, color: Color = Color.WHITE) -> void:
 	if dead:
 		return
+	if mark_t > 0.0:
+		dmg *= 1.0 + mark_v
 	hp -= dmg
 	flash_t = 0.07
 	game.add_floater(position, dmg, color, boss)

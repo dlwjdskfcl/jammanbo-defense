@@ -65,6 +65,8 @@ static func _save_node() -> Node:
 static func unlocked(char_id: String, tier: int) -> bool:
 	if tier <= 0:
 		return true
+	if not Data.is_pet(char_id):       # 모임 유닛은 반려 스킬이 없음
+		return false
 	if "--all-skills" in OS.get_cmdline_user_args():     # 검증용: Lv6/Lv12 스킬을 모두 켬
 		return true
 	var sv := _save_node()
@@ -76,7 +78,7 @@ static func unlocked(char_id: String, tier: int) -> bool:
 static func card_mult(char_id: String) -> float:
 	var sv := _save_node()
 	if sv != null and sv.has_method("card_mult"):
-		return float(sv.card_mult(char_id))
+		return float(sv.card_mult(char_id if Data.is_pet(char_id) else "club"))   # 모임 유닛은 '모임 카드' 하나를 공유
 	return 1.0
 
 
@@ -147,3 +149,29 @@ static func _load_prefs() -> void:
 	if _prefs == null:
 		_prefs = ConfigFile.new()
 		_prefs.load("user://gp_prefs.cfg")
+
+
+# ---- 유닛 그림 (모임 유닛 그림이 아직 없으면 반려(arr) 그림을 유닛 색으로 틴트한 임시 그림)
+static func unit_art_id(char_id: String, grade: int) -> String:
+	if ResourceLoader.exists("res://assets/td/units/%s/g%d_idle_0.png" % [char_id, grade]):
+		return char_id
+	return "arr"
+
+
+static func unit_has_art(char_id: String, grade: int) -> bool:
+	return unit_art_id(char_id, grade) == char_id
+
+
+static func unit_frames(char_id: String, grade: int) -> SpriteFrames:
+	return U.unit_frames(unit_art_id(char_id, grade), grade)
+
+
+static func unit_tex(char_id: String, grade: int) -> Texture2D:
+	return U.tex("res://assets/td/units/%s/g%d_idle_0.png" % [unit_art_id(char_id, grade), grade])
+
+
+## 임시 그림일 때만 틴트 색, 아니면 흰색
+static func unit_mod(char_id: String, grade: int) -> Color:
+	if unit_has_art(char_id, grade):
+		return Color.WHITE
+	return Color.WHITE.lerp(Data.unit_color(char_id), 0.8)

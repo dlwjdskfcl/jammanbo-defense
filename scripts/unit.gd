@@ -28,6 +28,8 @@ var anger_t: float = 0.0           # 여름 분노(괴롭히기) 남은 시간
 var dodge_stacks: int = 0
 var attack_count: int = 0
 var dragging: bool = false
+var absent: bool = false           # 노쇼 이벤트: 이번 웨이브 불참
+var aura_mult: float = 1.0         # 인접 미플 aura
 var _tier: Array = [true, false, false]
 
 
@@ -36,7 +38,7 @@ func setup(g, cid: String, gr: int, slot_index: int) -> void:
 	char_id = cid
 	grade = gr
 	slot = slot_index
-	stat = Data.d["characters"][cid]["stat"]
+	stat = Data.unit_def(cid)["stat"]
 	fire_stat = stat
 	for t in [1, 2]:
 		_tier[t] = GS.unlocked(cid, t)
@@ -49,7 +51,8 @@ func setup(g, cid: String, gr: int, slot_index: int) -> void:
 	range_px = base_range_px
 	cd = randf() * interval
 	spr = AnimatedSprite2D.new()
-	spr.sprite_frames = U.unit_frames(cid, gr)
+	spr.sprite_frames = GS.unit_frames(cid, gr)
+	spr.modulate = GS.unit_mod(cid, gr)
 	add_child(spr)
 	spr.play("idle")
 	spr.animation_finished.connect(_on_anim_finished)
@@ -76,7 +79,13 @@ func recalc() -> void:
 	var has_arr := false
 	var has_yeo := false
 	var near_mani := false
+	var aura := 1.0
+	var non_pet_nb := false
 	for n in nbs:
+		if n.stat["effect"] == "aura_spd":      # 미플: 인접 아군 공속 (등급이 높을수록 +15%씩 상대 증가)
+			aura *= 1.0 + float(n.stat["effect_value"]) * (1.0 + 0.15 * (n.grade - 1))
+		if not Data.is_pet(n.char_id):
+			non_pet_nb = true
 		if n.char_id == "arr":
 			has_arr = true
 		elif n.char_id == "yeoreum":
@@ -100,19 +109,30 @@ func recalc() -> void:
 		sm *= 1.0 - GS.v("syn_arr_slow")
 	if near_mani:
 		sm += GS.v("doglike_spd")
+	if char_id == "mani" and non_pet_nb:       # 판 위에 누운 고양이: 모임 유닛 옆이면 공속 +8%
+		sm *= 1.08
+	sm *= aura
+	aura_mult = aura
 	spd_mult = sm
 	damage = base_damage * dm
 	range_px = base_range_px * rm
 	badges.set_on("buff_atk", b_atk)
 	badges.set_on("buff_range", b_rng)
-	_update_spd_badge(near_mani)
+	_update_spd_badge(near_mani or aura > 1.0)
 
 
-func _update_spd_badge(near_mani: bool) -> void:
-	badges.set_on("buff_spd", near_mani or anger_t > 0.0)
+func set_absent(on: bool) -> void:
+	absent = on
+	spr.modulate = Color(0.45, 0.45, 0.5) if on else GS.unit_mod(char_id, grade)
+
+
+func _update_spd_badge(boosted: bool) -> void:
+	badges.set_on("buff_spd", boosted or anger_t > 0.0)
 
 
 func _process(delta: float) -> void:
+	if absent:
+		return
 	if anger_t > 0.0:
 		anger_t -= delta
 		if anger_t <= 0.0:
@@ -143,7 +163,7 @@ func fire(target) -> void:
 	spr.play("attack")
 	Sfx.play("attack_" + char_id)
 	attack_count += 1
-	var dmg := damage
+	var dmg: float = damage * game.cur_atk_mult()
 	var extra: Dictionary = {}
 	match char_id:
 		"arr":

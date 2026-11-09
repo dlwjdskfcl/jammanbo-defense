@@ -5,6 +5,7 @@ extends Control
 
 const U = preload("res://scripts/util.gd")
 const GS = preload("res://scripts/gp_skills.gd")
+const Odds = preload("res://scripts/gp_odds.gd")
 const M := "res://assets/screens/merge/"
 const PANEL_POS := Vector2(80, 250)
 const INK := Color(0.23, 0.14, 0.19)
@@ -88,15 +89,13 @@ func _ready() -> void:
 
 	# 확률
 	_text("결과 확률 (예시)", 20, Vector2(34, 352), Vector2(300, 28), Color.WHITE, panel, HORIZONTAL_ALIGNMENT_LEFT)
-	var keys: Array = Data.d["characters"].keys()
-	var pct := int(round(100.0 / keys.size()))
-	var x := 34.0
-	for cid in keys:
-		var nm := str(Data.d["characters"][cid]["name"])
-		_text(nm, 24, Vector2(x, 384), Vector2(80, 40), Color.WHITE, panel, HORIZONTAL_ALIGNMENT_LEFT)
-		_pct_lbls[cid] = _text("%d%%" % pct, 24, Vector2(x + 76, 384), Vector2(80, 40), Color(1, 0.85, 0.3), panel,
-				HORIZONTAL_ALIGNMENT_LEFT)
-		x += 170.0
+	var x := 26.0
+	for k in Odds.KINDS:     # 반려 / 딜러 / 서포터 / 꽝 합계 확률
+		_text(Odds.KIND_NAMES[k], 19, Vector2(x, 384), Vector2(60, 40), Color.WHITE if k != "dud" else Color(0.8, 0.8, 0.9),
+				panel, HORIZONTAL_ALIGNMENT_LEFT)
+		_pct_lbls[k] = _text("", 22, Vector2(x + 68, 384), Vector2(60, 40), Color(1, 0.85, 0.3) if k != "dud" else Color(1, 0.6, 0.6),
+				panel, HORIZONTAL_ALIGNMENT_LEFT)
+		x += 132.0
 	# 천장 게이지
 	var clover := TextureRect.new()
 	clover.texture = U.tex(M + "icon_clover.png")
@@ -176,7 +175,7 @@ func _build_recipe_panel(y: float) -> float:
 	p.add_theme_stylebox_override("panel", game._box(Color(0.16, 0.13, 0.26, 0.98), Color(0.95, 0.4, 0.5)))
 	add_child(p)
 	_text("신화 레시피 — %d성 서로 다른 캐릭터 한 마리씩" % g, 22, Vector2(0, 8), Vector2(560, 34), Color(1, 0.6, 0.65), p)
-	var keys: Array = Data.d["characters"].keys()
+	var keys: Array = Data.pet_ids()
 	var missing: Array = game.recipe_missing(g)
 	var bw := 168.0
 	var x := 14.0
@@ -198,12 +197,12 @@ func _build_recipe_panel(y: float) -> float:
 		ic.scale = Vector2(1.0, 1.0)
 		ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		b.add_child(ic)
-		_text("5성 " + str(Data.d["characters"][cid]["name"]), 20, Vector2(54, 0), Vector2(112, 64), Color.WHITE, b)
+		_text("5성 " + str(Data.unit_name(str(cid))), 20, Vector2(54, 0), Vector2(112, 64), Color.WHITE, b)
 		_recipe_btns[cid] = b
 		x += bw + 9.0
 	var names: Array = []
 	for cid in missing:
-		names.append(str(Data.d["characters"][cid]["name"]))
+		names.append(str(Data.unit_name(str(cid))))
 	var msg := "눌러서 5성을 지정하세요 (다시 누르면 랜덤)"
 	if not missing.is_empty():
 		msg = "지금은 사용 불가 — %d성 %s 필요" % [g, ", ".join(names)]
@@ -240,28 +239,29 @@ func _refresh() -> void:
 		var ic: TextureRect = _mat[i]
 		if i < _picks.size():
 			var u = game.slots[_picks[i]]
-			ic.texture = U.tex("res://assets/td/units/%s/g%d_idle_0.png" % [u.char_id, u.grade])
+			ic.texture = GS.unit_tex(u.char_id, u.grade)
+			ic.modulate = GS.unit_mod(u.char_id, u.grade)
 		else:
 			ic.texture = null
 	_count_img.texture = U.tex(M + "count_%dof3.png" % min(_picks.size(), 3))
 	var to_g := g + 1
 	if recipe_char != "":
 		_lbl_grade.text = "%s ×3 → %s %s (지정)" % [Data.grade_name(g), Data.grade_name(to_g),
-				Data.d["characters"][recipe_char]["name"]]
+				Data.unit_name(recipe_char)]
 	else:
 		_lbl_grade.text = "%s ×3 → %s ???" % [Data.grade_name(g), Data.grade_name(to_g)]
-	var n_chars: int = _pct_lbls.size()
-	for cid in _pct_lbls.keys():
-		var pc := int(round(100.0 / n_chars))
+	var kinds: Dictionary = Odds.by_kind(Odds.merge_probs(g + 1))
+	for k in _pct_lbls.keys():
+		var pc := int(round(float(kinds.get(k, 0.0)) * 100.0))
 		if recipe_char != "":
-			pc = 100 if cid == recipe_char else 0
-		(_pct_lbls[cid] as Label).text = "%d%%" % pc
+			pc = 100 if k == "pet" else 0
+		(_pct_lbls[k] as Label).text = "%d%%" % pc
 	for cid in _recipe_btns.keys():
 		var b: TextureButton = _recipe_btns[cid]
 		if not b.disabled:
 			b.modulate = Color.WHITE if (recipe_char == "" or recipe_char == cid) else Color(0.6, 0.6, 0.6)
 	if _recipe_note != null and recipe_char != "":
-		_recipe_note.text = "5성 %s 확정!  (대박 점프 없이 한 단계)" % Data.d["characters"][recipe_char]["name"]
+		_recipe_note.text = "5성 %s 확정!  (대박 점프 없이 한 단계)" % Data.unit_name(recipe_char)
 
 
 func _cancel() -> void:
@@ -306,17 +306,20 @@ func _flip(n: int) -> void:
 
 func _reveal() -> void:
 	_result_card.texture = U.tex(M + "card_flip_3.png")
+	if bool(_res.get("dud", false)):
+		Sfx.play("dud_merge")
 	var cid: String = str(_res["cid"])
 	var ng: int = int(_res["new_g"])
-	_result_icon.texture = U.tex("res://assets/td/units/%s/g%d_idle_0.png" % [cid, ng])
+	_result_icon.texture = GS.unit_tex(cid, ng)
+	_result_icon.modulate = GS.unit_mod(cid, ng)
 	_result_icon.visible = true
 	_result_icon.scale = Vector2(0.2, 0.2)
 	_result_icon.position = Vector2(424 + 48 - 6.4, 214 + 48 - 6.4)
 	var tw := create_tween()
 	tw.tween_property(_result_icon, "scale", Vector2(1, 1), 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tw.parallel().tween_property(_result_icon, "position", Vector2(424 + 16, 214 + 16), 0.25)
-	var nm := "%s ★%d %s" % [Data.d["characters"][cid]["name"], ng, Data.grade_name(ng)]
-	_lbl_grade.text = ("대박! " if bool(_res["lucky"]) else "") + nm
+	var nm := "%s ★%d %s" % [Data.unit_name(str(cid)), ng, Data.grade_name(ng)]
+	_lbl_grade.text = ("대박! " if bool(_res["lucky"]) else ("꽝… " if bool(_res.get("dud", false)) else "")) + nm
 	_lbl_grade.add_theme_color_override("font_color", Data.grade_color(ng))
 	_btn_ok.visible = true
 	for c in _btn_ok.get_children():

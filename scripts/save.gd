@@ -11,7 +11,7 @@ signal changed
 signal run_started(info: Dictionary)    # game.gd 가 판을 시작할 때 emit({"dungeon": selected_dungeon}). JmbLink 가 서버에 판 시작을 알림(안 보내면 JmbLink 가 장면 전환으로 대신 감지)
 signal run_recorded(info: Dictionary)   # record_run() 끝에 emit {win, wave, kills, coins, dungeon, play_sec, units:{g1..g5}, shards}
 
-const VERSION := 2
+const VERSION := 3
 const MAX_LEVEL := 15
 const DEFAULT_COSTS := [5, 5, 10, 15, 25, 35, 50, 65, 85, 105, 130, 155, 180, 215, 0]   # 레벨 n → n+1 에 필요한 재료
 const DEFAULT_UNLOCK := [1, 6, 12]                                                       # 스킬 단계(0,1,2)별 해금 레벨
@@ -39,13 +39,15 @@ var tutorial_done: bool = false
 var daily_last: String = ""      # 마지막으로 접속 보상을 받은 날짜 "YYYY-MM-DD"
 var _best_wave: int = 0
 var _levels: Dictionary = {}     # char_id -> level
-var _dungeons: Dictionary = {}   # 던전 번호(int) -> {"best_wave": int, "cleared": bool}
+var _dungeons: Dictionary = {}   # 던전 id("d01"..) -> {"best_wave": int, "cleared": bool}
 var selected_dungeon: int = 1 : set = _set_selected_dungeon   # 1..던전 수. 잠긴 던전은 선택되지 않음(game 은 이 값만 읽으면 됨)
 var _quest: Dictionary = {"date": "", "runs": 0, "wave": 0, "claimed": []}   # 오늘의 할 일 진행
 
 var save_path: String = "user://save.json"
 var persist: bool = true         # false 면 디스크에 쓰지 않음(봇/스크린샷 검증용)
 var cards_override: Dictionary = {}   # 테스트용: Data 대신 쓸 "cards" 표
+var units_override: Dictionary = {}   # 테스트용: Data 대신 쓸 "units" 표
+var dungeons_override: Array = []     # 테스트용: Data 대신 쓸 "dungeons" 배열
 var _flush_pending: bool = false
 var run_meta: Dictionary = {}    # (선택) game.gd 가 record_run 직전에 {"units": {"g1": n, … "g5": n}, "play_sec": 초} 를 넣으면 run_recorded 에 같이 감(서버는 play_sec 를 자기 시계로 다시 잼)
 
@@ -116,19 +118,51 @@ func _meta(key: String) -> int:
 
 
 # ================================================================== 고정 API
-## 카드 레벨 1..15
+## 카드 레벨 1..15. 카드는 반려(arr/mani/yeoreum) 각각 + 모임 카드 "club" 1장(반려가 아닌 모든 유닛 공통)
 func card_level(char_id: String) -> int:
 	return clampi(int(_levels.get(char_id, 1)), 1, max_level())
 
 
-## 공격력 배율 (Lv1 = 1.0)
-func card_mult(char_id: String) -> float:
-	return mult_of_level(card_level(char_id))
+## 공격력 배율 (Lv1 = 1.0). 반려가 아닌 유닛(units 표에서 pet=false)에는 club 카드의 배율을 돌려줌
+func card_mult(unit_id: String) -> float:
+	return mult_of_level(card_level(card_key(unit_id)))
 
 
-## tier 0=기본 스킬, 1=Lv6 해금, 2=Lv12 해금
+## tier 0=기본 스킬, 1=Lv6 해금, 2=Lv12 해금. 모임 카드/모임 유닛은 스킬이 없어 기본(0)만 true
 func skill_unlocked(char_id: String, tier: int) -> bool:
-	return card_level(char_id) >= unlock_level(char_id, tier)
+	var key := card_key(char_id)
+	if key == "club":
+		return tier == 0
+	return card_level(key) >= unlock_level(key, tier)
+
+
+## 유닛 id → 카드 id. 반려(또는 모르는 id)는 자기 자신, 반려가 아닌 유닛은 "club"
+func card_key(unit_id: String) -> String:
+	if unit_id == "club":
+		return "club"
+	var u: Dictionary = _units().get(unit_id, {})
+	if not u.is_empty() and not bool(u.get("pet", true)):
+		return "club"
+	return unit_id
+
+
+## 카드 화면에 나오는 카드 id 목록: 반려들(Data.d["characters"] 순서) + "club"
+func card_ids() -> Array:
+	var data = get_node_or_null("/root/Data") if is_inside_tree() else null
+	var out: Array = []
+	if data != null:
+		out = data.d.get("characters", {}).keys()
+	out.append("club")
+	return out
+
+
+func _units() -> Dictionary:
+	if not units_override.is_empty():
+		return units_override
+	var data = get_node_or_null("/root/Data") if is_inside_tree() else null
+	if data != null:
+		return data.d.get("units", {})
+	return {}
 
 
 func best_wave() -> int:
@@ -139,7 +173,8 @@ func best_wave() -> int:
 ## 코인(인게임 재화)은 재료 계산에 쓰지 않습니다(메타 재화와 분리).
 func record_run(win: bool, wave: int, kills: int, _coins: int) -> Dictionary:
 	var n := selected_dungeon
-	var d: Dictionary = _dungeons.get(n, {"best_wave": 0, "cleared": false})
+	var id := dungeon_id(n)
+	var d: Dictionary = _dungeons.get(id, {"best_wave": 0, "cleared": false})
 	var new_best := wave > int(d["best_wave"])
 	var gain := _meta("shards_base") + wave * _meta("shards_per_wave") + int(kills / 30) * _meta("shards_per_30kills")
 	if win:
@@ -149,12 +184,15 @@ func record_run(win: bool, wave: int, kills: int, _coins: int) -> Dictionary:
 		d["best_wave"] = wave
 	gain = int(round(clampi(gain, 0, _meta("shards_cap")) * dungeon_reward_mult(n)))
 	var first_clear: bool = win and not bool(d["cleared"])
+	var first_bonus := 0
 	var unlocked_next := 0
 	if win:
 		d["cleared"] = true
-		if first_clear and n < dungeon_count():
-			unlocked_next = n + 1
-	_dungeons[n] = d
+		if first_clear:
+			first_bonus = dungeon_first_clear_shards(n)
+			gain += first_bonus
+			unlocked_next = _next_unlocked_by(id)
+	_dungeons[id] = d
 	_best_wave = maxi(_best_wave, wave)
 	shards += gain
 	runs += 1
@@ -169,21 +207,34 @@ func record_run(win: bool, wave: int, kills: int, _coins: int) -> Dictionary:
 			"play_sec": int(run_meta.get("play_sec", 0)), "units": run_meta.get("units", {})})
 	run_meta = {}
 	return {"shards": gain, "best_wave": _best_wave, "new_best": new_best, "total_shards": shards,
-			"dungeon": n, "first_clear": first_clear, "unlocked_next": unlocked_next}
+			"dungeon": n, "first_clear": first_clear, "first_clear_shards": first_bonus, "unlocked_next": unlocked_next}
+
+
+## 방금 id 를 처음 클리어해서 새로 열린 던전 번호(없으면 0)
+func _next_unlocked_by(id: String) -> int:
+	var defs := dungeon_defs()
+	for i in defs.size():
+		var n := i + 1
+		var u := _unlock_id(n)
+		if n >= 2 and u == id:
+			return n
+	return 0
 
 
 # ================================================================== 던전 (티어 10개)
 ## 던전 목록. Data.d["dungeons"](엑셀 '던전' 시트)가 있으면 그것, 없으면 기본 10개 이름.
 ## 항목: {"name": String, ...(난이도 등 엑셀 열 그대로)}
 func dungeon_defs() -> Array:
+	if not dungeons_override.is_empty():
+		return dungeons_override
 	var data = get_node_or_null("/root/Data") if is_inside_tree() else null
 	if data != null:
 		var list = data.d.get("dungeons", [])
 		if list is Array and not list.is_empty():
 			return list
 	var out: Array = []
-	for nm in DEFAULT_DUNGEONS:
-		out.append({"name": nm})
+	for i in DEFAULT_DUNGEONS.size():
+		out.append({"id": "d%02d" % (i + 1), "name": DEFAULT_DUNGEONS[i]})
 	return out
 
 
@@ -191,27 +242,91 @@ func dungeon_count() -> int:
 	return dungeon_defs().size()
 
 
-func dungeon_name(n: int) -> String:
+func dungeon_def(n: int) -> Dictionary:
 	var defs := dungeon_defs()
 	if n < 1 or n > defs.size():
+		return {}
+	return defs[n - 1]
+
+
+## 던전 번호(1..) → id ("d01"..)
+func dungeon_id(n: int) -> String:
+	return str(dungeon_def(n).get("id", "d%02d" % n))
+
+
+func selected_dungeon_id() -> String:
+	return dungeon_id(selected_dungeon)
+
+
+func dungeon_number(id: String) -> int:
+	var defs := dungeon_defs()
+	for i in defs.size():
+		if str(defs[i].get("id", "d%02d" % (i + 1))) == id:
+			return i + 1
+	return 0
+
+
+func dungeon_name(n: int) -> String:
+	var def := dungeon_def(n)
+	if def.is_empty():
 		return ""
-	return str(defs[n - 1].get("name", "던전 %d" % n))
+	return str(def.get("name", "던전 %d" % n))
+
+
+## 이 던전을 열려면 클리어해야 하는 던전 id ("" 이면 처음부터 열림). 엑셀 unlock 필드, 없으면 앞 번호
+func _unlock_id(n: int) -> String:
+	if n <= 1:
+		return ""
+	var def := dungeon_def(n)
+	if def.has("unlock"):
+		var u := str(def["unlock"]).strip_edges()
+		return "" if (u == "-" or u == "") else u
+	return dungeon_id(n - 1)
+
+
+func dungeon_unlock_name(n: int) -> String:
+	var u := _unlock_id(n)
+	return dungeon_name(dungeon_number(u)) if u != "" else ""
 
 
 func dungeon_unlocked(n: int) -> bool:
-	return n == 1 or (n >= 2 and n <= dungeon_count() and dungeon_cleared(n - 1))
+	if n < 1 or n > dungeon_count():
+		return false
+	var u := _unlock_id(n)
+	return u == "" or bool(_dungeons.get(u, {}).get("cleared", false))
 
 
 func dungeon_cleared(n: int) -> bool:
-	return bool(_dungeons.get(n, {}).get("cleared", false))
+	return bool(_dungeons.get(dungeon_id(n), {}).get("cleared", false))
 
 
 func dungeon_best_wave(n: int) -> int:
-	return int(_dungeons.get(n, {}).get("best_wave", 0))
+	return int(_dungeons.get(dungeon_id(n), {}).get("best_wave", 0))
 
 
+## 재료 배수: 던전 데이터 shard_mult, 없으면 (1 + 25%×(n-1))
 func dungeon_reward_mult(n: int) -> float:
+	var def := dungeon_def(n)
+	if def.has("shard_mult"):
+		return float(def["shard_mult"])
 	return 1.0 + float(_meta("dungeon_reward_step_pct")) / 100.0 * (n - 1)
+
+
+func dungeon_first_clear_shards(n: int) -> int:
+	return int(dungeon_def(n).get("first_clear_shards", 0))
+
+
+func dungeon_rec_card_lv(n: int) -> int:
+	return int(dungeon_def(n).get("rec_card_lv", 0))
+
+
+## 내 카드 평균 레벨 (반려 3 + 모임 카드)
+func avg_card_level() -> float:
+	var ids := card_ids()
+	var t := 0
+	for cid in ids:
+		t += card_level(cid)
+	return float(t) / maxf(ids.size(), 1)
 
 
 ## 칭호 = 해금한 가장 높은 던전의 이름
@@ -234,10 +349,8 @@ func cleared_count() -> int:
 ## 계정 레벨 = 1 + 클리어한 던전 수 + 카드 레벨을 올린 합 (표시용)
 func account_level() -> int:
 	var lv := 1 + cleared_count()
-	var data = get_node_or_null("/root/Data") if is_inside_tree() else null
-	if data != null:
-		for cid in data.d.get("characters", {}):
-			lv += card_level(cid) - 1
+	for cid in card_ids():
+		lv += card_level(cid) - 1
 	return lv
 
 
@@ -355,7 +468,7 @@ func to_dict() -> Dictionary:
 			"total_kills": total_kills, "tutorial_done": tutorial_done,
 			"daily": {"last_date": daily_last},
 			"cards": _levels_out(),
-			"dungeons": {"selected": selected_dungeon, "list": _dungeons_out()},
+			"dungeons": {"selected": selected_dungeon, "selected_id": selected_dungeon_id(), "list": _dungeons_out()},
 			"daily_quest": _quest,
 			"settings": {"sfx_volume": sfx_volume, "bgm_volume": bgm_volume, "vibrate": vibrate,
 					"default_speed": default_speed, "merge_popup": merge_popup}}
@@ -363,7 +476,7 @@ func to_dict() -> Dictionary:
 
 func _dungeons_out() -> Dictionary:
 	var o := {}
-	for k in _dungeons:
+	for k in _dungeons:   # 키는 던전 id ("d01"..)
 		o[str(k)] = {"best_wave": int(_dungeons[k]["best_wave"]), "cleared": bool(_dungeons[k]["cleared"])}
 	return o
 
@@ -402,11 +515,19 @@ func load_game() -> void:
 	if f == null:
 		push_warning("저장 파일을 열 수 없음: %s" % save_path)
 		return
-	var parsed = JSON.parse_string(f.get_as_text())
+	var text := f.get_as_text()
 	f.close()
+	var parsed = JSON.parse_string(text)
 	if not (parsed is Dictionary):
 		_backup_broken()
 		return
+	if _int(parsed.get("version", 0), 0) < VERSION and persist:   # 옛 형식 저장: 새 버전으로 덮어쓰기 전에 원본을 한 번 보관
+		var bak := save_path + ".pre_v%d.bak" % VERSION
+		if not FileAccess.file_exists(bak):
+			var bf := FileAccess.open(bak, FileAccess.WRITE)
+			if bf != null:
+				bf.store_string(text)
+				bf.close()
 	apply_dict(parsed)
 
 
@@ -442,17 +563,28 @@ func apply_dict(d: Dictionary) -> void:
 	var dg = d.get("dungeons", null)
 	if dg is Dictionary and dg.get("list", null) is Dictionary:
 		for k in dg["list"]:
-			var n: int = str(k).to_int()
+			var ks := str(k)
+			var key := ""
+			if ks.is_valid_int():   # v2 이전: 번호 키 -> id
+				var num := ks.to_int()
+				if num >= 1 and num <= 99:
+					key = dungeon_id(num)
+			elif ks.length() >= 2 and ks.length() <= 12:
+				key = ks
 			var e = dg["list"][k]
-			if n >= 1 and n <= 99 and e is Dictionary:
-				_dungeons[n] = {"best_wave": maxi(_int(e.get("best_wave", 0), 0), 0), "cleared": _bool(e.get("cleared", false), false)}
-	elif ver < 2 and _best_wave > 0:   # 옛 저장: 지금까지의 최고 웨이브를 1단계 기록으로
-		_dungeons[1] = {"best_wave": _best_wave, "cleared": false}
-	for n in _dungeons:
-		_best_wave = maxi(_best_wave, int(_dungeons[n]["best_wave"]))
+			if key != "" and e is Dictionary:
+				_dungeons[key] = {"best_wave": maxi(_int(e.get("best_wave", 0), 0), 0), "cleared": _bool(e.get("cleared", false), false)}
+	elif ver < 2 and _best_wave > 0:   # v1: 지금까지의 최고 웨이브를 첫 던전 기록으로
+		_dungeons[dungeon_id(1)] = {"best_wave": _best_wave, "cleared": false}
+	for k in _dungeons:
+		_best_wave = maxi(_best_wave, int(_dungeons[k]["best_wave"]))
 	selected_dungeon = 1
 	if dg is Dictionary:
-		var sel := _int(dg.get("selected", 1), 1)
+		var sel := 0
+		if dg.get("selected_id", null) is String:
+			sel = dungeon_number(str(dg["selected_id"]))
+		if sel == 0:
+			sel = _int(dg.get("selected", 1), 1)
 		selected_dungeon = sel if dungeon_unlocked(sel) else 1
 	_quest = {"date": "", "runs": 0, "wave": 0, "claimed": []}
 	var dq = d.get("daily_quest", null)

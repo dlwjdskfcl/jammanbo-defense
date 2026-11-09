@@ -312,6 +312,1051 @@
         "fps": 12,
         "loop": false
       }
+    },
+    "meeple_g1": {
+      "character": "meeple",
+      "name": "미플",
+      "grade": 1,
+      "grade_name": "일반",
+      "sheet": "units/meeple_g1_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "meeple_g2": {
+      "character": "meeple",
+      "name": "미플",
+      "grade": 2,
+      "grade_name": "희귀",
+      "sheet": "units/meeple_g2_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "meeple_g3": {
+      "character": "meeple",
+      "name": "미플",
+      "grade": 3,
+      "grade_name": "영웅",
+      "sheet": "units/meeple_g3_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "meeple_g4": {
+      "character": "meeple",
+      "name": "미플",
+      "grade": 4,
+      "grade_name": "전설",
+      "sheet": "units/meeple_g4_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "meeple_g5": {
+      "character": "meeple",
+      "name": "미플",
+      "grade": 5,
+      "grade_name": "신화",
+      "sheet": "units/meeple_g5_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "dice_g1": {
+      "character": "dice",
+      "name": "주사위",
+      "grade": 1,
+      "grade_name": "일반",
+      "sheet": "units/dice_g1_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "dice_g2": {
+      "character": "dice",
+      "name": "주사위",
+      "grade": 2,
+      "grade_name": "희귀",
+      "sheet": "units/dice_g2_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "dice_g3": {
+      "character": "dice",
+      "name": "주사위",
+      "grade": 3,
+      "grade_name": "영웅",
+      "sheet": "units/dice_g3_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "dice_g4": {
+      "character": "dice",
+      "name": "주사위",
+      "grade": 4,
+      "grade_name": "전설",
+      "sheet": "units/dice_g4_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "dice_g5": {
+      "character": "dice",
+      "name": "주사위",
+      "grade": 5,
+      "grade_name": "신화",
+      "sheet": "units/dice_g5_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "card_g1": {
+      "character": "card",
+      "name": "카드",
+      "grade": 1,
+      "grade_name": "일반",
+      "sheet": "units/card_g1_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "card_g2": {
+      "character": "card",
+      "name": "카드",
+      "grade": 2,
+      "grade_name": "희귀",
+      "sheet": "units/card_g2_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "card_g3": {
+      "character": "card",
+      "name": "카드",
+      "grade": 3,
+      "grade_name": "영웅",
+      "sheet": "units/card_g3_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "card_g4": {
+      "character": "card",
+      "name": "카드",
+      "grade": 4,
+      "grade_name": "전설",
+      "sheet": "units/card_g4_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "card_g5": {
+      "character": "card",
+      "name": "카드",
+      "grade": 5,
+      "grade_name": "신화",
+      "sheet": "units/card_g5_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "chess_g1": {
+      "character": "chess",
+      "name": "체스말",
+      "grade": 1,
+      "grade_name": "일반",
+      "sheet": "units/chess_g1_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "chess_g2": {
+      "character": "chess",
+      "name": "체스말",
+      "grade": 2,
+      "grade_name": "희귀",
+      "sheet": "units/chess_g2_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "chess_g3": {
+      "character": "chess",
+      "name": "체스말",
+      "grade": 3,
+      "grade_name": "영웅",
+      "sheet": "units/chess_g3_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "chess_g4": {
+      "character": "chess",
+      "name": "체스말",
+      "grade": 4,
+      "grade_name": "전설",
+      "sheet": "units/chess_g4_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "chess_g5": {
+      "character": "chess",
+      "name": "체스말",
+      "grade": 5,
+      "grade_name": "신화",
+      "sheet": "units/chess_g5_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "hourglass_g1": {
+      "character": "hourglass",
+      "name": "모래시계",
+      "grade": 1,
+      "grade_name": "일반",
+      "sheet": "units/hourglass_g1_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "hourglass_g2": {
+      "character": "hourglass",
+      "name": "모래시계",
+      "grade": 2,
+      "grade_name": "희귀",
+      "sheet": "units/hourglass_g2_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "hourglass_g3": {
+      "character": "hourglass",
+      "name": "모래시계",
+      "grade": 3,
+      "grade_name": "영웅",
+      "sheet": "units/hourglass_g3_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "hourglass_g4": {
+      "character": "hourglass",
+      "name": "모래시계",
+      "grade": 4,
+      "grade_name": "전설",
+      "sheet": "units/hourglass_g4_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "hourglass_g5": {
+      "character": "hourglass",
+      "name": "모래시계",
+      "grade": 5,
+      "grade_name": "신화",
+      "sheet": "units/hourglass_g5_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "chip_g1": {
+      "character": "chip",
+      "name": "칩",
+      "grade": 1,
+      "grade_name": "일반",
+      "sheet": "units/chip_g1_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "chip_g2": {
+      "character": "chip",
+      "name": "칩",
+      "grade": 2,
+      "grade_name": "희귀",
+      "sheet": "units/chip_g2_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "chip_g3": {
+      "character": "chip",
+      "name": "칩",
+      "grade": 3,
+      "grade_name": "영웅",
+      "sheet": "units/chip_g3_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "chip_g4": {
+      "character": "chip",
+      "name": "칩",
+      "grade": 4,
+      "grade_name": "전설",
+      "sheet": "units/chip_g4_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "chip_g5": {
+      "character": "chip",
+      "name": "칩",
+      "grade": 5,
+      "grade_name": "신화",
+      "sheet": "units/chip_g5_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "roulette_g1": {
+      "character": "roulette",
+      "name": "룰렛",
+      "grade": 1,
+      "grade_name": "일반",
+      "sheet": "units/roulette_g1_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "roulette_g2": {
+      "character": "roulette",
+      "name": "룰렛",
+      "grade": 2,
+      "grade_name": "희귀",
+      "sheet": "units/roulette_g2_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "roulette_g3": {
+      "character": "roulette",
+      "name": "룰렛",
+      "grade": 3,
+      "grade_name": "영웅",
+      "sheet": "units/roulette_g3_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "roulette_g4": {
+      "character": "roulette",
+      "name": "룰렛",
+      "grade": 4,
+      "grade_name": "전설",
+      "sheet": "units/roulette_g4_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "roulette_g5": {
+      "character": "roulette",
+      "name": "룰렛",
+      "grade": 5,
+      "grade_name": "신화",
+      "sheet": "units/roulette_g5_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "rulebook_g1": {
+      "character": "rulebook",
+      "name": "룰북",
+      "grade": 1,
+      "grade_name": "일반",
+      "sheet": "units/rulebook_g1_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "rulebook_g2": {
+      "character": "rulebook",
+      "name": "룰북",
+      "grade": 2,
+      "grade_name": "희귀",
+      "sheet": "units/rulebook_g2_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "rulebook_g3": {
+      "character": "rulebook",
+      "name": "룰북",
+      "grade": 3,
+      "grade_name": "영웅",
+      "sheet": "units/rulebook_g3_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "rulebook_g4": {
+      "character": "rulebook",
+      "name": "룰북",
+      "grade": 4,
+      "grade_name": "전설",
+      "sheet": "units/rulebook_g4_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "rulebook_g5": {
+      "character": "rulebook",
+      "name": "룰북",
+      "grade": 5,
+      "grade_name": "신화",
+      "sheet": "units/rulebook_g5_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "blank_card_g1": {
+      "character": "blank_card",
+      "name": "빈 카드",
+      "grade": 1,
+      "grade_name": "일반",
+      "sheet": "units/blank_card_g1_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "blank_card_g2": {
+      "character": "blank_card",
+      "name": "빈 카드",
+      "grade": 2,
+      "grade_name": "희귀",
+      "sheet": "units/blank_card_g2_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "blank_card_g3": {
+      "character": "blank_card",
+      "name": "빈 카드",
+      "grade": 3,
+      "grade_name": "영웅",
+      "sheet": "units/blank_card_g3_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "blank_card_g4": {
+      "character": "blank_card",
+      "name": "빈 카드",
+      "grade": 4,
+      "grade_name": "전설",
+      "sheet": "units/blank_card_g4_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "blank_card_g5": {
+      "character": "blank_card",
+      "name": "빈 카드",
+      "grade": 5,
+      "grade_name": "신화",
+      "sheet": "units/blank_card_g5_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "broken_pawn_g1": {
+      "character": "broken_pawn",
+      "name": "부러진 말",
+      "grade": 1,
+      "grade_name": "일반",
+      "sheet": "units/broken_pawn_g1_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "broken_pawn_g2": {
+      "character": "broken_pawn",
+      "name": "부러진 말",
+      "grade": 2,
+      "grade_name": "희귀",
+      "sheet": "units/broken_pawn_g2_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "broken_pawn_g3": {
+      "character": "broken_pawn",
+      "name": "부러진 말",
+      "grade": 3,
+      "grade_name": "영웅",
+      "sheet": "units/broken_pawn_g3_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "broken_pawn_g4": {
+      "character": "broken_pawn",
+      "name": "부러진 말",
+      "grade": 4,
+      "grade_name": "전설",
+      "sheet": "units/broken_pawn_g4_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "broken_pawn_g5": {
+      "character": "broken_pawn",
+      "name": "부러진 말",
+      "grade": 5,
+      "grade_name": "신화",
+      "sheet": "units/broken_pawn_g5_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "empty_box_g1": {
+      "character": "empty_box",
+      "name": "빈 박스",
+      "grade": 1,
+      "grade_name": "일반",
+      "sheet": "units/empty_box_g1_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "empty_box_g2": {
+      "character": "empty_box",
+      "name": "빈 박스",
+      "grade": 2,
+      "grade_name": "희귀",
+      "sheet": "units/empty_box_g2_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "empty_box_g3": {
+      "character": "empty_box",
+      "name": "빈 박스",
+      "grade": 3,
+      "grade_name": "영웅",
+      "sheet": "units/empty_box_g3_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "empty_box_g4": {
+      "character": "empty_box",
+      "name": "빈 박스",
+      "grade": 4,
+      "grade_name": "전설",
+      "sheet": "units/empty_box_g4_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
+    },
+    "empty_box_g5": {
+      "character": "empty_box",
+      "name": "빈 박스",
+      "grade": 5,
+      "grade_name": "신화",
+      "sheet": "units/empty_box_g5_sheet.png",
+      "idle": {
+        "start": 0,
+        "frames": 4,
+        "fps": 4,
+        "loop": true
+      },
+      "attack": {
+        "start": 4,
+        "frames": 3,
+        "fps": 12,
+        "loop": false
+      }
     }
   },
   "enemies": {
@@ -582,6 +1627,36 @@
         96
       ],
       "note": "보스 · 병원 · 세트4 후보"
+    },
+    "boss_skeleton": {
+      "label": "보해골(보스)",
+      "frames": [
+        "enemies/boss_skeleton_0.png",
+        "enemies/boss_skeleton_1.png",
+        "enemies/boss_skeleton_2.png",
+        "enemies/boss_skeleton_3.png"
+      ],
+      "fps": 6,
+      "size": [
+        96,
+        96
+      ],
+      "note": "보스 · 던전 d09 최종"
+    },
+    "boss_ghost": {
+      "label": "보유령(보스)",
+      "frames": [
+        "enemies/boss_ghost_0.png",
+        "enemies/boss_ghost_1.png",
+        "enemies/boss_ghost_2.png",
+        "enemies/boss_ghost_3.png"
+      ],
+      "fps": 6,
+      "size": [
+        96,
+        96
+      ],
+      "note": "보스 · 던전 d10 최종"
     }
   },
   "projectiles": {
@@ -620,6 +1695,78 @@
         "projectiles/hit_spark_3.png"
       ],
       "fps": 16
+    },
+    "meeple_stone": {
+      "label": "미플 돌멩이",
+      "frames": [
+        "projectiles/meeple_stone_0.png",
+        "projectiles/meeple_stone_1.png"
+      ],
+      "fps": 10
+    },
+    "dice_roll": {
+      "label": "굴러가는 주사위",
+      "frames": [
+        "projectiles/dice_roll_0.png",
+        "projectiles/dice_roll_1.png",
+        "projectiles/dice_roll_2.png",
+        "projectiles/dice_roll_3.png"
+      ],
+      "fps": 14
+    },
+    "card_throw": {
+      "label": "던지는 카드",
+      "frames": [
+        "projectiles/card_throw_0.png",
+        "projectiles/card_throw_1.png",
+        "projectiles/card_throw_2.png"
+      ],
+      "fps": 14
+    },
+    "pawn_shot": {
+      "label": "체스말 발사",
+      "frames": [
+        "projectiles/pawn_shot_0.png",
+        "projectiles/pawn_shot_1.png"
+      ],
+      "fps": 12
+    },
+    "sand_grain": {
+      "label": "모래 알갱이",
+      "frames": [
+        "projectiles/sand_grain_0.png",
+        "projectiles/sand_grain_1.png",
+        "projectiles/sand_grain_2.png"
+      ],
+      "fps": 12
+    },
+    "roulette_ball": {
+      "label": "룰렛 공",
+      "frames": [
+        "projectiles/roulette_ball_0.png",
+        "projectiles/roulette_ball_1.png",
+        "projectiles/roulette_ball_2.png",
+        "projectiles/roulette_ball_3.png"
+      ],
+      "fps": 14
+    },
+    "chip_toss": {
+      "label": "던지는 칩",
+      "frames": [
+        "projectiles/chip_toss_0.png",
+        "projectiles/chip_toss_1.png",
+        "projectiles/chip_toss_2.png",
+        "projectiles/chip_toss_3.png"
+      ],
+      "fps": 14
+    },
+    "rule_page": {
+      "label": "날리는 책장",
+      "frames": [
+        "projectiles/rule_page_0.png",
+        "projectiles/rule_page_1.png"
+      ],
+      "fps": 10
     }
   },
   "ui": {

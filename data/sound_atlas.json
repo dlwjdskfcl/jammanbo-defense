@@ -268,6 +268,55 @@
       "seconds": 0.14,
       "loop": false
     },
+    "dice_roll": {
+      "file": "sfx/dice_roll.wav",
+      "label": "주사위 굴림",
+      "usage": "주사위 던지기/이벤트",
+      "seconds": 0.8,
+      "loop": false
+    },
+    "roulette_spin": {
+      "file": "sfx/roulette_spin.wav",
+      "label": "룰렛 돌아감",
+      "usage": "룰렛 이벤트/유닛 효과",
+      "seconds": 1.9,
+      "loop": false
+    },
+    "hourglass_flip": {
+      "file": "sfx/hourglass_flip.wav",
+      "label": "모래시계 뒤집기",
+      "usage": "시간 이벤트",
+      "seconds": 0.6,
+      "loop": false
+    },
+    "event_pop": {
+      "file": "sfx/event_pop.wav",
+      "label": "이벤트 등장",
+      "usage": "모임 이벤트 팝업",
+      "seconds": 0.32,
+      "loop": false
+    },
+    "dud_merge": {
+      "file": "sfx/dud_merge.wav",
+      "label": "꽝(슬픈 뿌우)",
+      "usage": "합성 결과가 꽝일 때",
+      "seconds": 1.45,
+      "loop": false
+    },
+    "dungeon_unlock": {
+      "file": "sfx/dungeon_unlock.wav",
+      "label": "던전 해금",
+      "usage": "새 던전 잠금 해제",
+      "seconds": 0.9,
+      "loop": false
+    },
+    "title_up": {
+      "file": "sfx/title_up.wav",
+      "label": "칭호 획득",
+      "usage": "칭호 상승/업적",
+      "seconds": 0.97,
+      "loop": false
+    },
     "bgm_menu": {
       "file": "bgm/bgm_menu.wav",
       "label": "타이틀/로비 BGM (밝고 느긋)",
@@ -317,6 +366,13 @@
     "card_flip": "card_flip",
     "level_up": "level_up",
     "mythic_summon": "mythic_summon",
-    "toast": "toast"
+    "toast": "toast",
+    "dice_roll": "dice_roll",
+    "roulette_spin": "roulette_spin",
+    "hourglass_flip": "hourglass_flip",
+    "event_pop": "event_pop",
+    "dud_merge": "dud_merge",
+    "dungeon_unlock": "dungeon_unlock",
+    "title_up": "title_up"
   }
 }

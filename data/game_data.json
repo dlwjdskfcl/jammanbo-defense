@@ -23,7 +23,19 @@
     "projectile_speed": 420,
     "boss_slow_resist": 0.5,
     "max_attack_speed": 8,
-    "clear_next_wave_sec": 3
+    "clear_next_wave_sec": 3,
+    "wave_bonus_base": 8,
+    "wave_bonus_per_wave": 0.5,
+    "protect_first_summons": 3,
+    "dud_rate_g2": 0.15,
+    "dud_rate_g3": 0.15,
+    "dud_rate_g4": 0.12,
+    "dud_rate_g5": 0.08,
+    "dud_pity": 2,
+    "dud_sell_mult": 1.3,
+    "use_unit_pool": 1,
+    "event_waves": "5,15,25,35",
+    "event_pick_sec": 8
   },
   "grades": [
     {
@@ -64,7 +76,7 @@
       "title": "뱅갈 × 코리안 숏헤어 · 수컷",
       "bg": "#e9dfc4",
       "stat": {
-        "damage": 12,
+        "damage": 11,
         "interval": 0.55,
         "range_tiles": 2.2,
         "projectile": "claw",
@@ -82,7 +94,7 @@
       "title": "코리안 숏헤어(턱시도) · 수컷",
       "bg": "#d8dde6",
       "stat": {
-        "damage": 9,
+        "damage": 11,
         "interval": 0.8,
         "range_tiles": 3,
         "projectile": "heart",
@@ -100,8 +112,8 @@
       "title": "보더콜리 × 진돗개 믹스 · 암컷",
       "bg": "#f3dcc0",
       "stat": {
-        "damage": 14,
-        "interval": 1.3,
+        "damage": 15,
+        "interval": 1.2,
         "range_tiles": 2.6,
         "projectile": "bark_wave",
         "target": "first",
@@ -255,6 +267,22 @@
       "hp": 3000,
       "speed": 38,
       "reward": 180,
+      "flying": false,
+      "boss": true
+    },
+    "boss_skeleton": {
+      "name": "보해골",
+      "hp": 3000,
+      "speed": 40,
+      "reward": 200,
+      "flying": false,
+      "boss": true
+    },
+    "boss_ghost": {
+      "name": "보유령",
+      "hp": 3000,
+      "speed": 50,
+      "reward": 220,
       "flying": false,
       "boss": true
     }
@@ -420,19 +448,19 @@
   "bosses": {
     "10": {
       "enemy": "boss_vacuum",
-      "hp": 3000
+      "hp": 4500
     },
     "20": {
       "enemy": "boss_stranger",
-      "hp": 15000
+      "hp": 20000
     },
     "30": {
       "enemy": "boss_vacuum",
-      "hp": 60000
+      "hp": 54000
     },
     "40": {
       "enemy": "boss_stranger",
-      "hp": 200000
+      "hp": 125000
     }
   },
   "cards": {
@@ -602,5 +630,1369 @@
       "shards_cap": 100,
       "daily_bonus": 10
     }
-  }
+  },
+  "units": {
+    "arr": {
+      "name": "아르",
+      "kind": "pet",
+      "shape": "cat",
+      "color": "#8c7b58",
+      "summon_weight": 10,
+      "merge_weight": 10,
+      "dud": false,
+      "sell_mult": 1,
+      "desc": "겁쟁이 고양이. 발톱 연타",
+      "from_dungeon": "d01",
+      "pet": true,
+      "stat": {
+        "damage": 11,
+        "interval": 0.55,
+        "range_tiles": 2.2,
+        "projectile": "claw",
+        "target": "first",
+        "effect": "none",
+        "effect_value": 0,
+        "effect_chance": 0,
+        "effect_time": 0,
+        "area_tiles": 0
+      }
+    },
+    "mani": {
+      "name": "마니",
+      "kind": "pet",
+      "shape": "cat",
+      "color": "#2a2a33",
+      "summon_weight": 10,
+      "merge_weight": 10,
+      "dud": false,
+      "sell_mult": 1,
+      "desc": "개냥이. 하트로 적을 느리게",
+      "from_dungeon": "d01",
+      "pet": true,
+      "stat": {
+        "damage": 11,
+        "interval": 0.8,
+        "range_tiles": 3,
+        "projectile": "heart",
+        "target": "random",
+        "effect": "slow",
+        "effect_value": 0.4,
+        "effect_chance": 0.35,
+        "effect_time": 1.5,
+        "area_tiles": 0
+      }
+    },
+    "yeoreum": {
+      "name": "여름",
+      "kind": "pet",
+      "shape": "dog",
+      "color": "#d49a5c",
+      "summon_weight": 10,
+      "merge_weight": 10,
+      "dud": false,
+      "sell_mult": 1,
+      "desc": "똑쟁이 강아지. 짖음으로 기절",
+      "from_dungeon": "d01",
+      "pet": true,
+      "stat": {
+        "damage": 15,
+        "interval": 1.2,
+        "range_tiles": 2.6,
+        "projectile": "bark_wave",
+        "target": "first",
+        "effect": "stun",
+        "effect_value": 0,
+        "effect_chance": 0.18,
+        "effect_time": 0.7,
+        "area_tiles": 1
+      }
+    },
+    "meeple": {
+      "name": "미플",
+      "kind": "support",
+      "shape": "meeple",
+      "color": "#c98a5a",
+      "summon_weight": 4,
+      "merge_weight": 4,
+      "dud": false,
+      "sell_mult": 1,
+      "desc": "나무 사람 말. 인접 아군 공속 +12%",
+      "from_dungeon": "d01",
+      "pet": false,
+      "stat": {
+        "damage": 8,
+        "interval": 0.9,
+        "range_tiles": 2.8,
+        "projectile": "meeple_stone",
+        "target": "first",
+        "effect": "aura_spd",
+        "effect_value": 0.12,
+        "effect_chance": 1,
+        "effect_time": 0,
+        "area_tiles": 0
+      }
+    },
+    "dice": {
+      "name": "주사위",
+      "kind": "dealer",
+      "shape": "dice",
+      "color": "#f2efe6",
+      "summon_weight": 7,
+      "merge_weight": 7,
+      "dud": false,
+      "sell_mult": 1,
+      "desc": "주사위. 굴림 눈/3.5배 피해, 6이면 폭발",
+      "from_dungeon": "d01",
+      "pet": false,
+      "stat": {
+        "damage": 10,
+        "interval": 0.8,
+        "range_tiles": 2.6,
+        "projectile": "dice_roll",
+        "target": "first",
+        "effect": "dice",
+        "effect_value": 1,
+        "effect_chance": 1,
+        "effect_time": 0,
+        "area_tiles": 1
+      }
+    },
+    "card": {
+      "name": "카드",
+      "kind": "dealer",
+      "shape": "card",
+      "color": "#ffffff",
+      "summon_weight": 7,
+      "merge_weight": 7,
+      "dud": false,
+      "sell_mult": 1,
+      "desc": "카드. 연속 던지기",
+      "from_dungeon": "d01",
+      "pet": false,
+      "stat": {
+        "damage": 5.5,
+        "interval": 0.33,
+        "range_tiles": 2.4,
+        "projectile": "card_throw",
+        "target": "first",
+        "effect": "none",
+        "effect_value": 0,
+        "effect_chance": 0,
+        "effect_time": 0,
+        "area_tiles": 0
+      }
+    },
+    "chess": {
+      "name": "체스말",
+      "kind": "dealer",
+      "shape": "pawn",
+      "color": "#3b3b46",
+      "summon_weight": 7,
+      "merge_weight": 7,
+      "dud": false,
+      "sell_mult": 1,
+      "desc": "체스말. 뒤의 적까지 관통",
+      "from_dungeon": "d01",
+      "pet": false,
+      "stat": {
+        "damage": 9.5,
+        "interval": 1,
+        "range_tiles": 3,
+        "projectile": "pawn_shot",
+        "target": "first",
+        "effect": "pierce",
+        "effect_value": 0.8,
+        "effect_chance": 1,
+        "effect_time": 0,
+        "area_tiles": 1.2
+      }
+    },
+    "hourglass": {
+      "name": "모래시계",
+      "kind": "support",
+      "shape": "hourglass",
+      "color": "#e8c36a",
+      "summon_weight": 4,
+      "merge_weight": 4,
+      "dud": false,
+      "sell_mult": 1,
+      "desc": "모래시계. 25% 기절 1초",
+      "from_dungeon": "d01",
+      "pet": false,
+      "stat": {
+        "damage": 8,
+        "interval": 1.2,
+        "range_tiles": 3,
+        "projectile": "sand_grain",
+        "target": "first",
+        "effect": "stun",
+        "effect_value": 0,
+        "effect_chance": 0.25,
+        "effect_time": 1,
+        "area_tiles": 0
+      }
+    },
+    "roulette": {
+      "name": "룰렛",
+      "kind": "dealer",
+      "shape": "roulette",
+      "color": "#c0392b",
+      "summon_weight": 7,
+      "merge_weight": 7,
+      "dud": false,
+      "sell_mult": 1,
+      "desc": "룰렛. 쏠 때마다 랜덤 효과",
+      "from_dungeon": "d01",
+      "pet": false,
+      "stat": {
+        "damage": 10,
+        "interval": 1,
+        "range_tiles": 2.6,
+        "projectile": "roulette_ball",
+        "target": "first",
+        "effect": "roulette",
+        "effect_value": 0,
+        "effect_chance": 1,
+        "effect_time": 2,
+        "area_tiles": 0
+      }
+    },
+    "chip": {
+      "name": "칩",
+      "kind": "support",
+      "shape": "chip",
+      "color": "#2f7fd1",
+      "summon_weight": 4,
+      "merge_weight": 4,
+      "dud": false,
+      "sell_mult": 1,
+      "desc": "칩. 잡은 적의 코인 +60%",
+      "from_dungeon": "d01",
+      "pet": false,
+      "stat": {
+        "damage": 8,
+        "interval": 1.1,
+        "range_tiles": 2.4,
+        "projectile": "chip_toss",
+        "target": "first",
+        "effect": "coin_kill",
+        "effect_value": 0.6,
+        "effect_chance": 1,
+        "effect_time": 0,
+        "area_tiles": 0
+      }
+    },
+    "rulebook": {
+      "name": "룰북",
+      "kind": "support",
+      "shape": "book",
+      "color": "#7a5a3a",
+      "summon_weight": 4,
+      "merge_weight": 4,
+      "dud": false,
+      "sell_mult": 1,
+      "desc": "룰북. 맞은 적 받는 피해 +20%",
+      "from_dungeon": "d01",
+      "pet": false,
+      "stat": {
+        "damage": 7,
+        "interval": 1,
+        "range_tiles": 3,
+        "projectile": "rule_page",
+        "target": "first",
+        "effect": "mark",
+        "effect_value": 0.2,
+        "effect_chance": 1,
+        "effect_time": 3,
+        "area_tiles": 0
+      }
+    },
+    "blank_card": {
+      "name": "빈 카드",
+      "kind": "dud",
+      "shape": "blank_card",
+      "color": "#f4f1e8",
+      "summon_weight": 0,
+      "merge_weight": 1,
+      "dud": true,
+      "sell_mult": 1.3,
+      "desc": "꽝: 아무것도 안 쓴 카드",
+      "from_dungeon": "d01",
+      "pet": false,
+      "stat": {
+        "damage": 3,
+        "interval": 1,
+        "range_tiles": 2,
+        "projectile": "hit_spark",
+        "target": "first",
+        "effect": "none",
+        "effect_value": 0,
+        "effect_chance": 0,
+        "effect_time": 0,
+        "area_tiles": 0
+      }
+    },
+    "broken_pawn": {
+      "name": "부러진 말",
+      "kind": "dud",
+      "shape": "broken_pawn",
+      "color": "#8a8a8a",
+      "summon_weight": 0,
+      "merge_weight": 1,
+      "dud": true,
+      "sell_mult": 1.3,
+      "desc": "꽝: 부러진 말",
+      "from_dungeon": "d01",
+      "pet": false,
+      "stat": {
+        "damage": 4,
+        "interval": 1.2,
+        "range_tiles": 1.6,
+        "projectile": "hit_spark",
+        "target": "first",
+        "effect": "none",
+        "effect_value": 0,
+        "effect_chance": 0,
+        "effect_time": 0,
+        "area_tiles": 0
+      }
+    },
+    "empty_box": {
+      "name": "빈 박스",
+      "kind": "dud",
+      "shape": "empty_box",
+      "color": "#b08a5a",
+      "summon_weight": 0,
+      "merge_weight": 1,
+      "dud": true,
+      "sell_mult": 1.3,
+      "desc": "꽝: 빈 박스(판매 위로금)",
+      "from_dungeon": "d01",
+      "pet": false,
+      "stat": {
+        "damage": 5,
+        "interval": 1.8,
+        "range_tiles": 1.5,
+        "projectile": "hit_spark",
+        "target": "first",
+        "effect": "none",
+        "effect_value": 0,
+        "effect_chance": 0,
+        "effect_time": 0,
+        "area_tiles": 0
+      }
+    }
+  },
+  "dungeons": [
+    {
+      "id": "d01",
+      "name": "보세포",
+      "concept": "룰북 한 장 펼치기 전, 거실 한가운데. 모든 게 처음이라 아르는 벌써 숨었다.",
+      "unlock": "-",
+      "waves": 40,
+      "hp_mult": 1,
+      "count_mult": 1,
+      "coin_mult": 1,
+      "boss_hp_mult": 1,
+      "pools": [
+        [
+          {
+            "enemy": "slime",
+            "weight": 1
+          },
+          {
+            "enemy": "parcel",
+            "weight": 0.5
+          }
+        ],
+        [
+          {
+            "enemy": "slime",
+            "weight": 1
+          },
+          {
+            "enemy": "stranger",
+            "weight": 1
+          },
+          {
+            "enemy": "doorbell",
+            "weight": 0.5
+          }
+        ],
+        [
+          {
+            "enemy": "stranger",
+            "weight": 1
+          },
+          {
+            "enemy": "parcel",
+            "weight": 0.6
+          },
+          {
+            "enemy": "robot_vac",
+            "weight": 0.7
+          }
+        ],
+        [
+          {
+            "enemy": "robot_vac",
+            "weight": 1
+          },
+          {
+            "enemy": "cloud",
+            "weight": 1
+          },
+          {
+            "enemy": "stranger",
+            "weight": 0.6
+          }
+        ]
+      ],
+      "bosses": {
+        "10": "boss_vacuum",
+        "20": "boss_stranger",
+        "30": "boss_vacuum",
+        "40": "boss_stranger"
+      },
+      "first_clear_shards": 75,
+      "shard_mult": 1,
+      "rec_card_lv": 1,
+      "icon": "dungeon_d01"
+    },
+    {
+      "id": "d02",
+      "name": "보생아",
+      "concept": "첫 울음, 첫 택배. 현관에서 상자와 초인종이 몰려온다.",
+      "unlock": "d01",
+      "waves": 40,
+      "hp_mult": 1.25,
+      "count_mult": 1.04,
+      "coin_mult": 1.06,
+      "boss_hp_mult": 1.25,
+      "pools": [
+        [
+          {
+            "enemy": "parcel",
+            "weight": 1
+          },
+          {
+            "enemy": "doorbell",
+            "weight": 0.7
+          },
+          {
+            "enemy": "slime",
+            "weight": 0.5
+          }
+        ],
+        [
+          {
+            "enemy": "doorbell",
+            "weight": 1
+          },
+          {
+            "enemy": "stranger",
+            "weight": 1
+          },
+          {
+            "enemy": "thunder_cloud",
+            "weight": 0.5
+          }
+        ],
+        [
+          {
+            "enemy": "firework",
+            "weight": 0.8
+          },
+          {
+            "enemy": "robot_vac",
+            "weight": 0.8
+          },
+          {
+            "enemy": "cloud",
+            "weight": 0.7
+          }
+        ],
+        [
+          {
+            "enemy": "thunder_cloud",
+            "weight": 1
+          },
+          {
+            "enemy": "robot_vac",
+            "weight": 1
+          },
+          {
+            "enemy": "firework",
+            "weight": 0.6
+          }
+        ]
+      ],
+      "bosses": {
+        "10": "boss_vacuum",
+        "20": "boss_thunder",
+        "30": "boss_stranger",
+        "40": "boss_thunder"
+      },
+      "first_clear_shards": 100,
+      "shard_mult": 1.2,
+      "rec_card_lv": 3,
+      "icon": "dungeon_d02"
+    },
+    {
+      "id": "d03",
+      "name": "보린이",
+      "concept": "\"룰 설명 3시간째\" 보린이의 욕실 앞. 드라이기와 이발기가 슬슬 등장.",
+      "unlock": "d02",
+      "waves": 40,
+      "hp_mult": 1.55,
+      "count_mult": 1.08,
+      "coin_mult": 1.12,
+      "boss_hp_mult": 1.55,
+      "pools": [
+        [
+          {
+            "enemy": "slime",
+            "weight": 1
+          },
+          {
+            "enemy": "firework",
+            "weight": 0.6
+          },
+          {
+            "enemy": "parcel",
+            "weight": 0.6
+          }
+        ],
+        [
+          {
+            "enemy": "stranger",
+            "weight": 1
+          },
+          {
+            "enemy": "dryer",
+            "weight": 0.6
+          },
+          {
+            "enemy": "thunder_cloud",
+            "weight": 0.5
+          }
+        ],
+        [
+          {
+            "enemy": "clipper",
+            "weight": 1
+          },
+          {
+            "enemy": "robot_vac",
+            "weight": 0.8
+          },
+          {
+            "enemy": "cloud",
+            "weight": 0.7
+          }
+        ],
+        [
+          {
+            "enemy": "dryer",
+            "weight": 1
+          },
+          {
+            "enemy": "clipper",
+            "weight": 1
+          },
+          {
+            "enemy": "robot_vac",
+            "weight": 1
+          }
+        ]
+      ],
+      "bosses": {
+        "10": "boss_thunder",
+        "20": "boss_vacuum",
+        "30": "boss_thunder",
+        "40": "boss_hospital"
+      },
+      "first_clear_shards": 125,
+      "shard_mult": 1.4,
+      "rec_card_lv": 5,
+      "icon": "dungeon_d03"
+    },
+    {
+      "id": "d04",
+      "name": "보소년",
+      "concept": "예방접종 날의 소년. 주사기가 나타나고 마니는 어느새 침대 밑.",
+      "unlock": "d03",
+      "waves": 40,
+      "hp_mult": 1.85,
+      "count_mult": 1.12,
+      "coin_mult": 1.18,
+      "boss_hp_mult": 1.85,
+      "pools": [
+        [
+          {
+            "enemy": "doorbell",
+            "weight": 1
+          },
+          {
+            "enemy": "parcel",
+            "weight": 0.8
+          },
+          {
+            "enemy": "clipper",
+            "weight": 0.4
+          }
+        ],
+        [
+          {
+            "enemy": "dryer",
+            "weight": 0.8
+          },
+          {
+            "enemy": "firework",
+            "weight": 0.8
+          },
+          {
+            "enemy": "cloud",
+            "weight": 0.6
+          }
+        ],
+        [
+          {
+            "enemy": "syringe",
+            "weight": 1
+          },
+          {
+            "enemy": "robot_vac",
+            "weight": 0.9
+          },
+          {
+            "enemy": "thunder_cloud",
+            "weight": 0.7
+          }
+        ],
+        [
+          {
+            "enemy": "syringe",
+            "weight": 1
+          },
+          {
+            "enemy": "clipper",
+            "weight": 1
+          },
+          {
+            "enemy": "robot_vac",
+            "weight": 1
+          },
+          {
+            "enemy": "cloud",
+            "weight": 0.6
+          }
+        ]
+      ],
+      "bosses": {
+        "10": "boss_vacuum",
+        "20": "boss_thunder",
+        "30": "boss_hospital",
+        "40": "boss_vacuum"
+      },
+      "first_clear_shards": 150,
+      "shard_mult": 1.6,
+      "rec_card_lv": 6,
+      "icon": "dungeon_d04"
+    },
+    {
+      "id": "d05",
+      "name": "보청년",
+      "concept": "이삿날의 청년. 이삿짐 박스가 길을 막고 천둥이 친다.",
+      "unlock": "d04",
+      "waves": 40,
+      "hp_mult": 1.65,
+      "count_mult": 1.16,
+      "coin_mult": 1.24,
+      "boss_hp_mult": 1.65,
+      "pools": [
+        [
+          {
+            "enemy": "parcel",
+            "weight": 1
+          },
+          {
+            "enemy": "dryer",
+            "weight": 0.5
+          },
+          {
+            "enemy": "stranger",
+            "weight": 0.7
+          }
+        ],
+        [
+          {
+            "enemy": "syringe",
+            "weight": 0.8
+          },
+          {
+            "enemy": "clipper",
+            "weight": 0.8
+          },
+          {
+            "enemy": "thunder_cloud",
+            "weight": 0.6
+          }
+        ],
+        [
+          {
+            "enemy": "moving_box",
+            "weight": 0.7
+          },
+          {
+            "enemy": "robot_vac",
+            "weight": 1
+          },
+          {
+            "enemy": "dryer",
+            "weight": 0.8
+          }
+        ],
+        [
+          {
+            "enemy": "moving_box",
+            "weight": 1
+          },
+          {
+            "enemy": "syringe",
+            "weight": 1
+          },
+          {
+            "enemy": "robot_vac",
+            "weight": 0.8
+          },
+          {
+            "enemy": "elite_storm",
+            "weight": 0.1
+          }
+        ]
+      ],
+      "bosses": {
+        "10": "boss_stranger",
+        "20": "boss_thunder",
+        "30": "boss_vacuum",
+        "40": "boss_thunder"
+      },
+      "first_clear_shards": 175,
+      "shard_mult": 1.8,
+      "rec_card_lv": 8,
+      "icon": "dungeon_d05"
+    },
+    {
+      "id": "d06",
+      "name": "보포티",
+      "concept": "벙주 5년 차 포티. 먹구름 대장이 모임 하늘을 덮는다.",
+      "unlock": "d05",
+      "waves": 40,
+      "hp_mult": 1.45,
+      "count_mult": 1.2,
+      "coin_mult": 1.3,
+      "boss_hp_mult": 1.45,
+      "pools": [
+        [
+          {
+            "enemy": "clipper",
+            "weight": 0.8
+          },
+          {
+            "enemy": "firework",
+            "weight": 0.8
+          },
+          {
+            "enemy": "doorbell",
+            "weight": 0.6
+          }
+        ],
+        [
+          {
+            "enemy": "syringe",
+            "weight": 0.9
+          },
+          {
+            "enemy": "dryer",
+            "weight": 0.9
+          },
+          {
+            "enemy": "cloud",
+            "weight": 0.7
+          }
+        ],
+        [
+          {
+            "enemy": "moving_box",
+            "weight": 0.8
+          },
+          {
+            "enemy": "thunder_cloud",
+            "weight": 0.8
+          },
+          {
+            "enemy": "robot_vac",
+            "weight": 0.9
+          },
+          {
+            "enemy": "elite_storm",
+            "weight": 0.1
+          }
+        ],
+        [
+          {
+            "enemy": "moving_box",
+            "weight": 1
+          },
+          {
+            "enemy": "syringe",
+            "weight": 1
+          },
+          {
+            "enemy": "elite_storm",
+            "weight": 0.15
+          },
+          {
+            "enemy": "elite_mover",
+            "weight": 0.1
+          }
+        ]
+      ],
+      "bosses": {
+        "10": "boss_vacuum",
+        "20": "boss_hospital",
+        "30": "boss_stranger",
+        "40": "boss_hospital"
+      },
+      "first_clear_shards": 200,
+      "shard_mult": 2,
+      "rec_card_lv": 9,
+      "icon": "dungeon_d06"
+    },
+    {
+      "id": "d07",
+      "name": "보중년",
+      "concept": "모임 장소를 두 번 옮긴 중년. 이삿짐 수레가 느리게 밀려온다.",
+      "unlock": "d06",
+      "waves": 40,
+      "hp_mult": 1.45,
+      "count_mult": 1.24,
+      "coin_mult": 1.36,
+      "boss_hp_mult": 1.45,
+      "pools": [
+        [
+          {
+            "enemy": "dryer",
+            "weight": 0.8
+          },
+          {
+            "enemy": "syringe",
+            "weight": 0.5
+          },
+          {
+            "enemy": "stranger",
+            "weight": 0.8
+          }
+        ],
+        [
+          {
+            "enemy": "moving_box",
+            "weight": 0.5
+          },
+          {
+            "enemy": "clipper",
+            "weight": 1
+          },
+          {
+            "enemy": "thunder_cloud",
+            "weight": 0.8
+          }
+        ],
+        [
+          {
+            "enemy": "syringe",
+            "weight": 1
+          },
+          {
+            "enemy": "robot_vac",
+            "weight": 1
+          },
+          {
+            "enemy": "elite_storm",
+            "weight": 0.12
+          },
+          {
+            "enemy": "elite_mover",
+            "weight": 0.08
+          }
+        ],
+        [
+          {
+            "enemy": "moving_box",
+            "weight": 1
+          },
+          {
+            "enemy": "dryer",
+            "weight": 1
+          },
+          {
+            "enemy": "elite_mover",
+            "weight": 0.15
+          },
+          {
+            "enemy": "elite_storm",
+            "weight": 0.15
+          }
+        ]
+      ],
+      "bosses": {
+        "10": "boss_thunder",
+        "20": "boss_vacuum",
+        "30": "boss_hospital",
+        "40": "boss_stranger"
+      },
+      "first_clear_shards": 225,
+      "shard_mult": 2.2,
+      "rec_card_lv": 11,
+      "icon": "dungeon_d07"
+    },
+    {
+      "id": "d08",
+      "name": "보노인",
+      "concept": "오래된 룰북을 외우는 노인. 병원과 청소기가 번갈아 온다.",
+      "unlock": "d07",
+      "waves": 40,
+      "hp_mult": 1.45,
+      "count_mult": 1.28,
+      "coin_mult": 1.42,
+      "boss_hp_mult": 1.45,
+      "pools": [
+        [
+          {
+            "enemy": "clipper",
+            "weight": 1
+          },
+          {
+            "enemy": "dryer",
+            "weight": 0.8
+          },
+          {
+            "enemy": "firework",
+            "weight": 0.8
+          }
+        ],
+        [
+          {
+            "enemy": "syringe",
+            "weight": 1
+          },
+          {
+            "enemy": "moving_box",
+            "weight": 0.6
+          },
+          {
+            "enemy": "thunder_cloud",
+            "weight": 0.8
+          }
+        ],
+        [
+          {
+            "enemy": "moving_box",
+            "weight": 1
+          },
+          {
+            "enemy": "robot_vac",
+            "weight": 1
+          },
+          {
+            "enemy": "elite_storm",
+            "weight": 0.15
+          },
+          {
+            "enemy": "elite_mover",
+            "weight": 0.1
+          }
+        ],
+        [
+          {
+            "enemy": "moving_box",
+            "weight": 1
+          },
+          {
+            "enemy": "syringe",
+            "weight": 1
+          },
+          {
+            "enemy": "elite_mover",
+            "weight": 0.2
+          },
+          {
+            "enemy": "elite_storm",
+            "weight": 0.2
+          }
+        ]
+      ],
+      "bosses": {
+        "10": "boss_stranger",
+        "20": "boss_vacuum",
+        "30": "boss_thunder",
+        "40": "boss_hospital"
+      },
+      "first_clear_shards": 250,
+      "shard_mult": 2.4,
+      "rec_card_lv": 12,
+      "icon": "dungeon_d08"
+    },
+    {
+      "id": "d09",
+      "name": "보해골",
+      "concept": "마지막 판 뒤에 남은 해골 — 박스만 쌓인 모임방.",
+      "unlock": "d08",
+      "waves": 40,
+      "hp_mult": 1.5,
+      "count_mult": 1.32,
+      "coin_mult": 1.48,
+      "boss_hp_mult": 1.5,
+      "pools": [
+        [
+          {
+            "enemy": "dryer",
+            "weight": 1
+          },
+          {
+            "enemy": "syringe",
+            "weight": 0.8
+          },
+          {
+            "enemy": "clipper",
+            "weight": 0.8
+          }
+        ],
+        [
+          {
+            "enemy": "moving_box",
+            "weight": 0.8
+          },
+          {
+            "enemy": "syringe",
+            "weight": 1
+          },
+          {
+            "enemy": "thunder_cloud",
+            "weight": 0.8
+          }
+        ],
+        [
+          {
+            "enemy": "moving_box",
+            "weight": 1
+          },
+          {
+            "enemy": "robot_vac",
+            "weight": 1
+          },
+          {
+            "enemy": "elite_storm",
+            "weight": 0.2
+          },
+          {
+            "enemy": "elite_mover",
+            "weight": 0.15
+          }
+        ],
+        [
+          {
+            "enemy": "moving_box",
+            "weight": 1
+          },
+          {
+            "enemy": "syringe",
+            "weight": 1
+          },
+          {
+            "enemy": "elite_mover",
+            "weight": 0.25
+          },
+          {
+            "enemy": "elite_storm",
+            "weight": 0.25
+          }
+        ]
+      ],
+      "bosses": {
+        "10": "boss_hospital",
+        "20": "boss_thunder",
+        "30": "boss_vacuum",
+        "40": "boss_skeleton"
+      },
+      "first_clear_shards": 275,
+      "shard_mult": 2.6,
+      "rec_card_lv": 14,
+      "icon": "dungeon_d09"
+    },
+    {
+      "id": "d10",
+      "name": "보유령",
+      "concept": "모임이 끝났는데 집에 안 가는 유령. 마지막 던전.",
+      "unlock": "d09",
+      "waves": 40,
+      "hp_mult": 1.35,
+      "count_mult": 1.36,
+      "coin_mult": 1.54,
+      "boss_hp_mult": 1.35,
+      "pools": [
+        [
+          {
+            "enemy": "syringe",
+            "weight": 1
+          },
+          {
+            "enemy": "dryer",
+            "weight": 1
+          },
+          {
+            "enemy": "clipper",
+            "weight": 1
+          }
+        ],
+        [
+          {
+            "enemy": "moving_box",
+            "weight": 1
+          },
+          {
+            "enemy": "syringe",
+            "weight": 1
+          },
+          {
+            "enemy": "thunder_cloud",
+            "weight": 1
+          }
+        ],
+        [
+          {
+            "enemy": "moving_box",
+            "weight": 1
+          },
+          {
+            "enemy": "robot_vac",
+            "weight": 1
+          },
+          {
+            "enemy": "elite_storm",
+            "weight": 0.25
+          },
+          {
+            "enemy": "elite_mover",
+            "weight": 0.2
+          }
+        ],
+        [
+          {
+            "enemy": "moving_box",
+            "weight": 1
+          },
+          {
+            "enemy": "syringe",
+            "weight": 1
+          },
+          {
+            "enemy": "elite_mover",
+            "weight": 0.3
+          },
+          {
+            "enemy": "elite_storm",
+            "weight": 0.3
+          }
+        ]
+      ],
+      "bosses": {
+        "10": "boss_vacuum",
+        "20": "boss_hospital",
+        "30": "boss_stranger",
+        "40": "boss_ghost"
+      },
+      "first_clear_shards": 300,
+      "shard_mult": 2.8,
+      "rec_card_lv": 15,
+      "icon": "dungeon_d10"
+    }
+  ],
+  "hp_curve": {
+    "1": 2.281,
+    "2": 2.292,
+    "3": 2.334,
+    "4": 2.391,
+    "5": 2.46,
+    "6": 2.541,
+    "7": 2.648,
+    "8": 2.764,
+    "9": 2.888,
+    "10": 3.019,
+    "11": 3.157,
+    "12": 3.285,
+    "13": 3.391,
+    "14": 3.461,
+    "15": 3.511,
+    "16": 3.529,
+    "17": 3.492,
+    "18": 3.427,
+    "19": 3.314,
+    "20": 3.178,
+    "21": 3.0,
+    "22": 2.806,
+    "23": 2.607,
+    "24": 2.394,
+    "25": 2.18,
+    "26": 2.04,
+    "27": 1.91,
+    "28": 1.79,
+    "29": 1.68,
+    "30": 1.58,
+    "31": 1.5,
+    "32": 1.43,
+    "33": 1.37,
+    "34": 1.32,
+    "35": 1.29,
+    "36": 1.26,
+    "37": 1.24,
+    "38": 1.23,
+    "39": 1.22,
+    "40": 1.21
+  },
+  "events": [
+    {
+      "id": "ev_start_roulette",
+      "name": "시작 플레이어 룰렛",
+      "kind": "도박",
+      "desc": "룰렛이 돌아 하나 자동 선택: 공격력 +15%(이번 웨이브) / 코인 +40 / 무료 소환 1회",
+      "v1": 0.15,
+      "v2": 40,
+      "v3": 1,
+      "weight": 10,
+      "enabled": true
+    },
+    {
+      "id": "ev_hourglass",
+      "name": "모래시계 뒤집기",
+      "kind": "좋음",
+      "desc": "필드 모든 적 3초 정지 + 이후 10초 이동속도 -25% (보스는 정지 1.5초)",
+      "v1": 3,
+      "v2": 10,
+      "v3": 0.25,
+      "weight": 10,
+      "enabled": true
+    },
+    {
+      "id": "ev_dice_bet",
+      "name": "주사위 코인 도박",
+      "kind": "도박",
+      "desc": "코인 N(20/50/100) 걸고 굴림: 1~2 잃음 / 3~4 본전 / 5~6 두 배. 안 걸어도 됨",
+      "v1": 20,
+      "v2": 50,
+      "v3": 100,
+      "weight": 10,
+      "enabled": true
+    },
+    {
+      "id": "ev_host_call",
+      "name": "벙주 호출",
+      "kind": "좋음",
+      "desc": "벙주가 와서 빈 칸에 2성 유닛 1마리 무료(소환 풀 확률대로)",
+      "v1": 2,
+      "v2": 0,
+      "v3": 0,
+      "weight": 10,
+      "enabled": true
+    },
+    {
+      "id": "ev_noshow",
+      "name": "노쇼",
+      "kind": "나쁨",
+      "desc": "무작위 유닛 1마리가 이번 웨이브 불참(공격 정지), 대신 위약금 코인 +30",
+      "v1": 1,
+      "v2": 30,
+      "v3": 0,
+      "weight": 6,
+      "enabled": true
+    },
+    {
+      "id": "ev_late",
+      "name": "지각자 도착",
+      "kind": "중립",
+      "desc": "이번 웨이브 시작이 5초 늦음(그동안 코인 사용 가능), 대신 적 수 +10%",
+      "v1": 5,
+      "v2": 0.1,
+      "v3": 0,
+      "weight": 6,
+      "enabled": false
+    },
+    {
+      "id": "ev_snack",
+      "name": "간식 타임",
+      "kind": "좋음",
+      "desc": "모든 유닛 공속 +15% 20초(반려 3종은 +30%)",
+      "v1": 0.15,
+      "v2": 20,
+      "v3": 0.3,
+      "weight": 8,
+      "enabled": false
+    },
+    {
+      "id": "ev_rule_explain",
+      "name": "룰 설명 시간",
+      "kind": "중립",
+      "desc": "이번 웨이브 대박 확률 +15%p, 대신 소환 비용 +30%",
+      "v1": 0.15,
+      "v2": 0.3,
+      "v3": 0,
+      "weight": 6,
+      "enabled": false
+    },
+    {
+      "id": "ev_call",
+      "name": "큰 콜 선언",
+      "kind": "도박",
+      "desc": "이번 웨이브 적 HP x1.5 선언 → 클리어 시 코인/재료 x2, 실패 시 코인 -50",
+      "v1": 1.5,
+      "v2": 2,
+      "v3": 50,
+      "weight": 6,
+      "enabled": false
+    },
+    {
+      "id": "ev_tourney",
+      "name": "미니 대회 개최",
+      "kind": "좋음",
+      "desc": "정예 적 1마리 등장, 처치하면 코인 3배",
+      "v1": 3,
+      "v2": 0,
+      "v3": 0,
+      "weight": 6,
+      "enabled": false
+    },
+    {
+      "id": "ev_escape",
+      "name": "방탈출",
+      "kind": "도박",
+      "desc": "문 3개 중 하나: 정답=랜덤 유닛(2성) / 함정=적 3마리 추가 / 빈방",
+      "v1": 2,
+      "v2": 3,
+      "v3": 0,
+      "weight": 6,
+      "enabled": false
+    },
+    {
+      "id": "ev_raffle",
+      "name": "추첨",
+      "kind": "좋음",
+      "desc": "번호 3개 중 하나: 코인 +20 / +60 / +150 (확률 60/30/10)",
+      "v1": 20,
+      "v2": 60,
+      "v3": 150,
+      "weight": 8,
+      "enabled": false
+    }
+  ]
 }

@@ -19,10 +19,26 @@ func _ready() -> void:
 	size = Vector2(720, 1280)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	save = get_node_or_null("/root/Save")
-	ids = Data.d.get("characters", {}).keys()
+	ids = save.card_ids() if save != null else Data.d.get("characters", {}).keys() + ["club"]
 	if save:
 		save.changed.connect(_build)
 	_build()
+
+
+const CLUB_INFO := {"name": "모임", "species": "club", "bg": "#dcd3f2", "stat": {}}
+
+
+func _info(cid: String) -> Dictionary:
+	return CLUB_INFO if cid == "club" else Data.d["characters"].get(cid, {"name": cid, "stat": {}})
+
+
+## 모임 카드가 적용되는 유닛(units 표에서 pet=false) 수
+func _club_units() -> int:
+	var n := 0
+	for k in Data.d.get("units", {}):
+		if not bool(Data.d["units"][k].get("pet", true)):
+			n += 1
+	return n
 
 
 func _fmt(v: float) -> String:
@@ -46,7 +62,8 @@ func _build() -> void:
 		return
 	sel = clampi(sel, 0, ids.size() - 1)
 	var cid: String = ids[sel]
-	var info: Dictionary = Data.d["characters"][cid]
+	var info: Dictionary = _info(cid)
+	var is_club := cid == "club"
 	var lv := _level(cid)
 	var max_lv: int = 15 if save == null else int(save.max_level())
 	var shards: int = 0 if save == null else int(save.shards)
@@ -58,10 +75,15 @@ func _build() -> void:
 	var bg_col := Color.html(str(info.get("bg", "#e9dfc4")))
 	layer.add_child(K.panel(Rect2(45, 235, 215, 300), Color(0.2, 0.15, 0.1), Color(0.35, 0.27, 0.2), 16, 4))
 	layer.add_child(K.panel(Rect2(53, 243, 199, 284), bg_col, bg_col.darkened(0.2), 10, 2))
-	layer.add_child(K.icon("res://assets/portraits/%s_normal.png" % cid, Vector2(58, 252), 3.0))
+	if is_club:
+		layer.add_child(K.icon(C + "icon_card.png", Vector2(88, 270), 4.5))   # 임시 그림(모임 유닛 초상화가 생기면 교체)
+	else:
+		layer.add_child(K.icon("res://assets/portraits/%s_normal.png" % cid, Vector2(58, 252), 3.0))
 	layer.add_child(K.label(str(info.get("name", cid)), 34, Vector2(53, 448), Vector2(199, 46), Color(0.2, 0.14, 0.12),
 			HORIZONTAL_ALIGNMENT_CENTER, false))
 	var species := "고양이" if str(info.get("species", "")) == "cat" else "강아지"
+	if is_club:
+		species = "모임 유닛 공통"
 	var tag: String = str(TAGLINE.get(cid, ""))
 	layer.add_child(K.label(species + (" · " + tag if tag != "" else ""), 21, Vector2(53, 490), Vector2(199, 32),
 			Color(0.4, 0.32, 0.28), HORIZONTAL_ALIGNMENT_CENTER, false))
@@ -95,14 +117,24 @@ func _build() -> void:
 		["공격속도", "%s /초" % _fmt(1.0 / maxf(float(st.get("interval", 1.0)), 0.01)), ""],
 		["사거리", "%s칸" % _fmt(float(st.get("range_tiles", 0))), ""],
 	]
+	if is_club:
+		var bonus_now := (mult_now - 1.0) * 100.0
+		var bonus_next := (mult_next - 1.0) * 100.0
+		rows = [
+			["공격력 보너스", "+%s%%" % _fmt(bonus_now), ("+" + _fmt(bonus_next - bonus_now) + "%") if lv < max_lv else "MAX"],
+			["적용 대상", "모임 유닛 %d종" % _club_units(), ""],
+			["큰 성장", "Lv6 · Lv12", ""],
+		]
 	for i in rows.size():
 		var y := 410.0 + i * 56.0
 		layer.add_child(K.panel(Rect2(290, y, 400, 48), K.ROW_FILL, K.ROW_LINE, 12, 2))
 		layer.add_child(K.label(rows[i][0], 22, Vector2(306, y), Vector2(130, 48), K.WHITE, HORIZONTAL_ALIGNMENT_LEFT, false))
 		layer.add_child(K.label(rows[i][1], 24, Vector2(430, y), Vector2(150, 48), K.GOLD, HORIZONTAL_ALIGNMENT_RIGHT, false))
 		layer.add_child(K.label(rows[i][2], 22, Vector2(580, y), Vector2(100, 48), K.GREEN, HORIZONTAL_ALIGNMENT_RIGHT, false))
-	layer.add_child(K.label("※ 공격력은 1성 기준, 합성하면 등급 배율이 곱해져요 (공속 상한 %s/초)" % str(Data.rule("max_attack_speed", 8)),
-			18, Vector2(45, 586), Vector2(645, 30), K.DIM, HORIZONTAL_ALIGNMENT_LEFT, false))
+	var note := "※ 공격력은 1성 기준, 합성하면 등급 배율이 곱해져요 (공속 상한 %s/초)" % str(Data.rule("max_attack_speed", 8))
+	if is_club:
+		note = "※ 반려(아르·마니·여름)가 아닌 모든 유닛에 적용돼요"
+	layer.add_child(K.label(note, 18, Vector2(45, 586), Vector2(645, 30), K.DIM, HORIZONTAL_ALIGNMENT_LEFT, false))
 
 	# 성장 단계 트랙
 	layer.add_child(K.label("성장 단계", 30, Vector2(60, 624), Vector2(300, 44), K.GOLD, HORIZONTAL_ALIGNMENT_LEFT))
@@ -121,10 +153,17 @@ func _build() -> void:
 			layer.add_child(K.icon(C + ("pip_on.png" if reached else "pip_off.png"), Vector2(x - 13, 680), 1.0))
 
 	# 스킬
-	layer.add_child(K.label("스킬", 30, Vector2(60, 750), Vector2(300, 44), K.GOLD, HORIZONTAL_ALIGNMENT_LEFT))
-	var skills: Array = [] if save == null else save.skills_of(cid)
+	layer.add_child(K.label("스킬" if not is_club else "효과", 30, Vector2(60, 750), Vector2(300, 44), K.GOLD, HORIZONTAL_ALIGNMENT_LEFT))
+	var skills: Array = [] if (save == null or is_club) else save.skills_of(cid)
 	for i in skills.size():
 		_skill_cell(skills[i], i, skills.size(), lv)
+	if is_club:
+		layer.add_child(K.panel(Rect2(60, 790, 600, 200), K.ROW_FILL, K.ROW_LINE, 16, 3))
+		layer.add_child(K.icon(C + "icon_card.png", Vector2(90, 860), 2.5))
+		var club_txt := K.label("모임 카드\n모든 모임 유닛 공격력 +%s%%" % _fmt((mult_now - 1.0) * 100.0), 26, Vector2(190, 800),
+				Vector2(450, 180), K.WHITE, HORIZONTAL_ALIGNMENT_LEFT, false)
+		club_txt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		layer.add_child(club_txt)
 
 	# 강화 버튼
 	var chk: Dictionary = {"ok": false, "reason": "", "cost": 0} if save == null else save.can_upgrade(cid)
@@ -148,7 +187,7 @@ func _tabs(parent: Control) -> void:
 	for i in n:
 		var on := i == sel
 		var x := 30.0 + i * (w + gap)
-		parent.add_child(K.button(C + ("tab_on.png" if on else "tab_off.png"), str(Data.d["characters"][ids[i]].get("name", ids[i])),
+		parent.add_child(K.button(C + ("tab_on.png" if on else "tab_off.png"), str(_info(ids[i]).get("name", ids[i])),
 				Rect2(x, 128, w, 84), _select.bind(i), 30))
 
 

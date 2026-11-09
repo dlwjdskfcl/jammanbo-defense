@@ -9,6 +9,8 @@ const GS = preload("res://scripts/gp_skills.gd")
 const FloatersScript = preload("res://scripts/gp_floaters.gd")
 const MergePopup = preload("res://scripts/gp_merge_popup.gd")
 const ResultScreen = preload("res://scripts/gp_result.gd")
+const Odds = preload("res://scripts/gp_odds.gd")
+const EventsScript = preload("res://scripts/gp_events.gd")
 
 const T := 64
 const COLS := 8
@@ -90,6 +92,18 @@ var _dragging: bool = false
 var _long_done: bool = false
 var _drag_unit = null
 var run_result: Dictionary = {}
+var summon_count: int = 0
+var dud_streak: int = 0           # 꽝 연속 횟수(꽝 천장 dud_pity)
+var dungeon_n: int = 1
+var dungeon_data: Dictionary = {}
+var freeze_t: float = 0.0         # 모래시계 이벤트: 적 정지 남은 시간
+var freeze_total: float = 0.0
+var global_slow_t: float = 0.0
+var global_slow_f: float = 0.0
+var atk_buff: float = 1.0         # 이벤트 공격력 배율(atk_buff_wave 웨이브에서만)
+var atk_buff_wave: int = -1
+var absent_units: Array = []      # 노쇼로 불참 중인 유닛
+var pending_wave: int = 0
 var clear_t: float = -1.0     # 웨이브 조기 클리어 후 다음 웨이브까지 남은 시간(-1=대기 아님)
 
 
@@ -104,15 +118,45 @@ func _ready() -> void:
 	for i in SLOT_COUNT:
 		slots[i] = null
 	coins = int(Data.rule("start_coins", 100))
+	_select_dungeon()
 	_build_world()
 	_build_ui()
 	if autoplay:
 		Engine.time_scale = 4.0 if shot_path != "" else 8.0
 	Sfx.play_bgm("bgm_battle")
+	var sv := get_node_or_null("/root/Save")
+	if sv != null and "run_started" in sv and not autoplay:
+		sv.run_started.emit({"dungeon": dungeon_n})
 	_start_wave(1)
 	for ua in OS.get_cmdline_user_args():     # 검증용: --uishot=종류:경로.png (merge|mythic|card|sell|result|pause)
 		if ua.begins_with("--uishot="):
 			_ui_test(ua.substr(9))
+
+
+## 던전 선택: 인자 --dungeon=d01 (검증용) > Save.selected_dungeon > 1. 던전 데이터가 없으면 예전 waves/bosses 사용.
+func _select_dungeon() -> void:
+	dungeon_n = 1
+	var sv := get_node_or_null("/root/Save")
+	if sv != null and "selected_dungeon" in sv:
+		dungeon_n = int(sv.selected_dungeon)
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--dungeon="):
+			var v := a.substr(10)
+			dungeon_n = int(v.trim_prefix("d")) if v.begins_with("d") else int(v)
+	dungeon_data = Data.dungeon(dungeon_n)
+	if dungeon_data.is_empty():
+		dungeon_n = 1
+		dungeon_data = Data.dungeon(1)
+
+
+func _total_waves() -> int:
+	if not dungeon_data.is_empty():
+		return int(dungeon_data.get("waves", Data.rule("total_waves", 40)))
+	return _total_waves()
+
+
+func cur_atk_mult() -> float:
+	return atk_buff if wave == atk_buff_wave else 1.0
 
 
 ## 검증 전용: 상황을 만들어 UI 를 연 뒤 화면을 저장하고 종료
@@ -127,6 +171,10 @@ func _ui_test(spec: String) -> void:
 			setup = [[0, "arr", 4], [1, "mani", 4], [2, "yeoreum", 4], [6, "arr", 2], [8, "arr", 1]]
 		"card":
 			setup = [[7, "yeoreum", 3], [8, "arr", 3], [1, "mani", 2], [3, "arr", 1]]
+		"pool":
+			setup = [[0, "dice", 1], [1, "card", 2], [2, "chess", 3], [3, "meeple", 2], [6, "hourglass", 1], [7, "chip", 3], [8, "roulette", 2], [9, "rulebook", 1], [12, "blank_card", 2], [13, "empty_box", 3], [14, "broken_pawn", 1], [15, "arr", 2]]
+		"dud":
+			setup = [[0, "blank_card", 2], [1, "broken_pawn", 2], [2, "empty_box", 2]]
 		_:
 			setup = [[0, "arr", 2], [1, "arr", 2], [2, "mani", 2], [7, "yeoreum", 1]]
 	for s in setup:
@@ -155,6 +203,11 @@ func _ui_test(spec: String) -> void:
 			_end(parts.size() > 2 and parts[2] == "win", "필드 적 61 / 한도 60")
 		"pause":
 			_toggle_pause()
+		"event":
+			pending_wave = 5
+			_open_event(5, _draw_event_cards())
+		"pool":
+			_show_card(slots[2])
 		"boss":
 			_start_wave(10)
 			await get_tree().create_timer(0.7).timeout
@@ -477,7 +530,7 @@ func _update_hud() -> void:
 		a = (0.35 + 0.5 * (frac - 0.8) * 5.0) * (0.5 + 0.5 * sin(elapsed * spd))
 	for e in warn_edges:
 		e.modulate.a = a
-	var tw := int(Data.rule("total_waves", 40))
+	var tw := _total_waves()
 	lbl_wave.text = "%s %d / %d" % ["BOSS" if is_boss_wave else "WAVE", wave, tw]
 	var wsec := float(Data.rule("wave_seconds", 25))
 	if is_boss_wave:
@@ -509,7 +562,7 @@ func _update_info() -> void:
 	btn_info.visible = has_sel
 	if has_sel:
 		var u = slots[selected]
-		var info: Dictionary = Data.d["characters"][u.char_id]
+		var info: Dictionary = Data.unit_def(u.char_id)
 		var same := _slots_of_grade(u.grade).size()
 		var active: Array = []
 		for s in GS.skill_list(u.char_id):
@@ -721,7 +774,7 @@ func _open_info_selected() -> void:
 
 func _show_card(u) -> void:
 	var cid: String = u.char_id
-	var info: Dictionary = Data.d["characters"][cid]
+	var info: Dictionary = Data.unit_def(cid)
 	var m := Control.new()
 	m.size = Vector2(720, 1280)
 	var catcher := ColorRect.new()      # 어디든 누르면 닫힘
@@ -738,7 +791,8 @@ func _show_card(u) -> void:
 	panel.add_theme_stylebox_override("panel", _box(Color(0.16, 0.13, 0.26, 0.98), Data.grade_color(u.grade)))
 	m.add_child(panel)
 	var ic := TextureRect.new()
-	ic.texture = U.tex("res://assets/td/units/%s/g%d_idle_0.png" % [cid, u.grade])
+	ic.texture = GS.unit_tex(cid, u.grade)
+	ic.modulate = GS.unit_mod(cid, u.grade)
 	ic.position = Vector2(50, 270)
 	ic.scale = Vector2(1.6, 1.6)
 	ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -753,6 +807,18 @@ func _show_card(u) -> void:
 		eff_txt = "둔화 %d%% (%d%% 확률)" % [int(float(u.stat["effect_value"]) * 100.0), int(float(u.stat["effect_chance"]) * 100.0)]
 	elif eff == "stun":
 		eff_txt = "스턴 %.1f초 (%d%% 확률)" % [float(u.stat["effect_time"]), int(float(u.stat["effect_chance"]) * 100.0)]
+	elif eff == "aura_spd":
+		eff_txt = "인접 아군 공속 +%d%%" % int(float(u.stat["effect_value"]) * 100.0)
+	elif eff == "dice":
+		eff_txt = "굴림 눈/3.5배, 6이면 폭발"
+	elif eff == "pierce":
+		eff_txt = "뒤의 적 %d%% 관통" % int(float(u.stat["effect_value"]) * 100.0)
+	elif eff == "roulette":
+		eff_txt = "감속/기절/2배/코인 랜덤"
+	elif eff == "coin_kill":
+		eff_txt = "처치 코인 +%d%%" % int(float(u.stat["effect_value"]) * 100.0)
+	elif eff == "mark":
+		eff_txt = "표식: 받는 피해 +%d%%" % int(float(u.stat["effect_value"]) * 100.0)
 	var aps: float = 1.0 / max(u.base_interval / max(u.spd_mult, 0.1), 0.05)
 	var lines: Array = [
 		"공격력 %d  (기본 %d)" % [int(u.damage), int(u.base_damage)],
@@ -807,8 +873,11 @@ func _free_slot() -> int:
 
 
 func _random_char() -> String:
-	var keys: Array = Data.d["characters"].keys()
-	return str(keys[rng.randi() % keys.size()])
+	if not Odds.use_pool():
+		var keys: Array = Data.d["characters"].keys()
+		return str(keys[rng.randi() % keys.size()])
+	var protect := summon_count < int(Data.rule("protect_first_summons", 0))
+	return Odds.pick(Odds.summon_probs("support" if protect else ""), rng)
 
 
 func _place_unit(i: int, cid: String, grade: int) -> void:
@@ -837,6 +906,7 @@ func summon() -> void:
 		return
 	coins -= cost
 	_place_unit(i, _random_char(), 1)
+	summon_count += 1
 	_recalc_units()
 	spawn_fx("fx", "summon_poof", slot_center(i))
 	Sfx.play("summon")
@@ -866,7 +936,7 @@ func _mergeable_grade() -> int:
 ## 신화 레시피에 모자란 캐릭터 목록 (g = 최상위 바로 아래 등급). 비어 있으면 레시피 가능.
 func recipe_missing(g: int) -> Array:
 	var missing: Array = []
-	for cid in Data.d["characters"].keys():
+	for cid in Data.pet_ids():
 		var found := false
 		for i in _slots_of_grade(g):
 			if slots[i].char_id == cid:
@@ -894,7 +964,7 @@ func build_plan(g: int, recipe_char: String = "") -> Array:
 		first = selected
 	var picks: Array = []
 	if recipe_char != "":
-		for cid in Data.d["characters"].keys():
+		for cid in Data.pet_ids():
 			for i in idxs:
 				if slots[i].char_id == cid and not picks.has(i):
 					picks.append(i)
@@ -902,13 +972,29 @@ func build_plan(g: int, recipe_char: String = "") -> Array:
 		return picks
 	picks.append(first)
 	var cid0: String = slots[first].char_id
-	for i in idxs:      # 같은 캐릭터 먼저
-		if i != first and slots[i].char_id == cid0 and picks.size() < 3:
-			picks.append(i)
+	var rest: Array = []
 	for i in idxs:
-		if not picks.has(i) and picks.size() < 3:
+		if i != first:
+			rest.append(i)
+	# 선택 유닛 → 같은 id → 꽝 → 서포터 → 딜러 → 반려 순(약한 것부터)
+	rest.sort_custom(func(x, y): return _mat_rank(slots[x].char_id, cid0) < _mat_rank(slots[y].char_id, cid0))
+	for i in rest:
+		if picks.size() < 3:
 			picks.append(i)
 	return picks
+
+
+func _mat_rank(cid: String, same_as: String) -> int:
+	if cid == same_as:
+		return 0
+	match str(Data.unit_def(cid).get("kind", "pet")):
+		"dud":
+			return 1
+		"support":
+			return 2
+		"dealer":
+			return 3
+	return 4
 
 
 ## 결과를 굴림 (천장 카운터 소모). {cid, new_g, lucky}
@@ -924,8 +1010,20 @@ func roll_merge(g: int, recipe_char: String = "") -> Dictionary:
 			lucky = true
 			new_g = g + 2
 			lucky_counter = 0
-	var cid := recipe_char if recipe_char != "" else _random_char()
-	return {"cid": cid, "new_g": new_g, "lucky": lucky}
+	if recipe_char != "":        # 신화 레시피: 반려 지정, 꽝 없음
+		dud_streak = 0
+		return {"cid": recipe_char, "new_g": new_g, "lucky": lucky, "dud": false}
+	if not Odds.use_pool():
+		return {"cid": _random_char(), "new_g": new_g, "lucky": lucky, "dud": false}
+	var cid := ""
+	if lucky:                    # 대박은 꽝 없음, 소환 분포
+		cid = Odds.pick(Odds.merge_probs(new_g, true), rng)
+	else:
+		var guard := dud_streak >= int(Data.rule("dud_pity", 2))
+		cid = Odds.pick(Odds.merge_probs(new_g, false, guard), rng)
+	var is_dud := Data.is_dud(cid)
+	dud_streak = dud_streak + 1 if is_dud else 0
+	return {"cid": cid, "new_g": new_g, "lucky": lucky, "dud": is_dud}
 
 
 func apply_merge(picks: Array, res: Dictionary) -> void:
@@ -949,6 +1047,8 @@ func apply_merge(picks: Array, res: Dictionary) -> void:
 	Sfx.play("merge_%d" % ng)
 	if bool(res["lucky"]):
 		_popup("대박! %d성 점프" % int(res["new_g"]), Color(1, 0.6, 0.9), 520.0)
+	elif bool(res.get("dud", false)):
+		_popup("꽝! %s…" % Data.unit_name(str(res["cid"])), Color(0.75, 0.75, 0.85), 520.0)
 	elif int(res["new_g"]) >= Data.max_grade():
 		_popup("신화 탄생!", Color(1, 0.5, 0.6), 520.0)
 	overlay.queue_redraw()
@@ -965,10 +1065,13 @@ func merge() -> void:
 	if autoplay or GS.quick_merge():
 		var rc := ""
 		if autoplay and is_recipe_grade(g) and recipe_missing(g).is_empty():
-			var keys: Array = Data.d["characters"].keys()
+			var keys: Array = Data.pet_ids()
 			rc = str(keys[rng.randi() % keys.size()])
 		var picks := build_plan(g, rc)
-		apply_merge(picks, roll_merge(g, rc))
+		var res := roll_merge(g, rc)
+		if bool(res.get("dud", false)):
+			Sfx.play("dud_merge")
+		apply_merge(picks, res)
 		return
 	Sfx.play("button")
 	var p := MergePopup.new()
@@ -983,7 +1086,7 @@ func sell() -> void:
 		_do_sell(selected)
 		return
 	var u = slots[selected]
-	var refund := int(Data.rule("sell_refund_g%d" % u.grade, 10))
+	var refund := _refund(u)
 	var m := Control.new()
 	m.size = Vector2(720, 1280)
 	var dim := ColorRect.new()
@@ -996,7 +1099,7 @@ func sell() -> void:
 	panel.add_theme_stylebox_override("panel", _box(Color(0.16, 0.13, 0.26, 0.98), Color(0.9, 0.35, 0.4)))
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	m.add_child(panel)
-	var info: Dictionary = Data.d["characters"][u.char_id]
+	var info: Dictionary = Data.unit_def(u.char_id)
 	m.add_child(_label("정말 판매할까요?", 40, Vector2(60, 460), Vector2(600, 60), Color(1, 0.85, 0.3)))
 	m.add_child(_label("%s  ★%d %s" % [info["name"], u.grade, Data.grade_name(u.grade)], 30, Vector2(60, 530),
 			Vector2(600, 50), Data.grade_color(u.grade)))
@@ -1009,11 +1112,15 @@ func sell() -> void:
 	open_modal(m)
 
 
+func _refund(u) -> int:
+	return int(round(float(Data.rule("sell_refund_g%d" % u.grade, 10)) * float(Data.unit_def(u.char_id).get("sell_mult", 1.0))))
+
+
 func _do_sell(i: int) -> void:
 	var u = slots[i]
 	if u == null:
 		return
-	coins += int(Data.rule("sell_refund_g%d" % u.grade, 10))
+	coins += _refund(u)
 	_remove_unit(i)
 	if selected == i:
 		selected = -1
@@ -1054,37 +1161,78 @@ func is_leader(t) -> bool:
 func apply_hit(target, dmg: float, stat: Dictionary, src = null, extra: Dictionary = {}) -> void:
 	if src != null:
 		dmg = src.on_hit(target, dmg, extra)
+	var eff := str(stat["effect"])
 	var area := float(stat["area_tiles"]) * T
-	var center: Vector2 = target.position
+	var area_f := 0.6
 	var col := Color(1, 0.95, 0.6) if (extra.get("punch", false) or extra.get("free", false)) else Color.WHITE
+	var roul := -1
+	match eff:
+		"dice":        # 눈/3.5 배 피해, 6 이면 반경 1.5칸 폭발(100%)
+			var roll := rng.randi_range(1, 6)
+			dmg *= float(roll) / 3.5
+			if roll == 6:
+				area = 1.5 * T
+				area_f = 1.0
+				col = Color(1, 0.6, 0.3)
+				spawn_fx("fx", "death_boom", target.position, 0.9)
+		"pierce":      # 뒤의 적에게 효과값 배 피해
+			area_f = float(stat["effect_value"])
+		"roulette":    # 25% 감속 / 25% 기절 / 25% 2배 / 25% 코인
+			roul = rng.randi() % 4
+			if roul == 2:
+				dmg *= 2.0
+				col = Color(1, 0.8, 0.3)
+			elif roul == 3:
+				coins += 2
+	var center: Vector2 = target.position
+	target.killer = src
 	target.take_hit(dmg, col)
 	if area > 0.0:
 		if src != null and src.char_id == "yeoreum":
 			spawn_skill_fx("yeo_bark", center, 0.9, 14.0)
 		for e in enemies.duplicate():
 			if e != target and not e.dead and e.position.distance_to(center) <= area:
-				e.take_hit(dmg * 0.6, Color(0.9, 0.9, 0.9))
+				e.killer = src
+				e.take_hit(dmg * area_f, Color(0.9, 0.9, 0.9))
 	if target.dead:
 		return
-	var eff := str(stat["effect"])
-	if eff == "none" or randf() > float(stat["effect_chance"]):
+	match eff:
+		"mark":        # 룰북: 모든 유닛의 피해 증가 표식
+			target.mark_t = float(stat["effect_time"])
+			target.mark_v = float(stat["effect_value"])
+			return
+		"roulette":
+			if roul == 0:
+				_apply_slow(target, 0.5, float(stat["effect_time"]), src)
+			elif roul == 1 and not target.boss:
+				target.stun_t = 0.8
+			return
+	if eff == "none" or eff == "aura_spd" or eff == "dice" or eff == "pierce" or eff == "coin_kill":
+		return
+	if randf() > float(stat["effect_chance"]):
 		return
 	var t := float(stat["effect_time"])
 	if eff == "slow":
-		var f := float(stat["effect_value"])
-		if target.boss:
-			f *= float(Data.rule("boss_slow_resist", 0.5))
-		target.slow_f = 1.0 - f
-		target.slow_t = t
-		if src != null and src.char_id == "mani":
-			spawn_skill_fx("mani_charm", target.position + Vector2(0, -16), 0.7, 10.0)
+		_apply_slow(target, float(stat["effect_value"]), t, src)
 	elif eff == "stun" and not target.boss:
 		target.stun_t = t
 
 
+func _apply_slow(target, f: float, t: float, src) -> void:
+	if target.boss:
+		f *= float(Data.rule("boss_slow_resist", 0.5))
+	target.slow_f = 1.0 - f
+	target.slow_t = t
+	if src != null and src.char_id == "mani":
+		spawn_skill_fx("mani_charm", target.position + Vector2(0, -16), 0.7, 10.0)
+
+
 func on_enemy_died(e) -> void:
 	enemies.erase(e)
-	coins += e.reward
+	var rew: int = e.reward
+	if e.killer != null and is_instance_valid(e.killer) and str(e.killer.stat["effect"]) == "coin_kill":
+		rew = int(round(rew * (1.0 + float(e.killer.stat["effect_value"]))))
+	coins += rew
 	kills += 1
 	var dfx := "death_puff"
 	var dsc := 1.0
@@ -1108,7 +1256,7 @@ func on_enemy_died(e) -> void:
 		if boss_timer >= fast_limit:
 			coins += int(Data.rule("boss_fast_bonus", 100))
 			_popup("빠른 처치 보너스!", Color(1, 0.9, 0.4), 520.0)
-		if wave >= int(Data.rule("total_waves", 40)):
+		if wave >= _total_waves():
 			_end(true)
 		else:
 			_start_wave(wave + 1)
@@ -1125,10 +1273,18 @@ func _boss_alive() -> bool:
 func _pick_enemy(w: int) -> String:
 	var pool: Array = []
 	var total := 0.0
-	for r in Data.d["waves"]:
-		if w >= int(r["from"]) and w <= int(r["to"]):
-			pool.append(r)
-			total += float(r["weight"])
+	if not dungeon_data.is_empty():       # 던전 적풀: 웨이브 1~10, 11~20, 21~30, 31~40
+		var pools: Array = dungeon_data["pools"]
+		var seg := clampi(int((w - 1) / 10), 0, pools.size() - 1)
+		for r in pools[seg]:
+			if Data.d["enemies"].has(str(r["enemy"])):
+				pool.append({"enemy": r["enemy"], "weight": r["weight"]})
+				total += float(r["weight"])
+	else:
+		for r in Data.d["waves"]:
+			if w >= int(r["from"]) and w <= int(r["to"]):
+				pool.append(r)
+				total += float(r["weight"])
 	var x := rng.randf() * total
 	for r in pool:
 		x -= float(r["weight"])
@@ -1137,20 +1293,60 @@ func _pick_enemy(w: int) -> String:
 	return str(pool[0]["enemy"]) if not pool.is_empty() else "slime"
 
 
+## 웨이브 시작. 이벤트 웨이브면 카드 선택(시간 정지)이 끝난 뒤 _begin_wave 로 이어짐
 func _start_wave(w: int) -> void:
+	if _is_event_wave(w):
+		var cards := _draw_event_cards()
+		if not cards.is_empty():
+			pending_wave = w
+			clear_t = -1.0
+			_open_event(w, cards)
+			return
+	_begin_wave(w)
+
+
+func _is_event_wave(w: int) -> bool:
+	if Data.events.is_empty():
+		return false
+	var list := str(Data.rule("event_waves", "")).split(",", false)
+	return list.has(str(w)) and not Data.d["bosses"].has(str(w))
+
+
+func _boss_hp_mult() -> float:
+	var v = dungeon_data.get("boss_hp_mult", null)
+	if v is float or v is int:
+		return float(v)
+	return float(dungeon_data.get("hp_mult", 1.0))     # 엑셀 내보내기 값이 이상하면 일반 HP 배수 사용
+
+
+func _begin_wave(w: int) -> void:
 	wave = w
 	wave_time = 0.0
 	clear_t = -1.0
 	spawn_queue.clear()
+	for u in absent_units:      # 노쇼는 한 웨이브만
+		if is_instance_valid(u):
+			u.set_absent(false)
+	absent_units.clear()
 	var growth := float(Data.rule("reward_growth", 0.08))
+	var d := dungeon_data
+	var has_d := not d.is_empty()
+	var coin_mult := float(d.get("coin_mult", 1.0)) if has_d else 1.0
 	var bosses: Dictionary = Data.d["bosses"]
 	is_boss_wave = bosses.has(str(w))
+	var bonus := int(round(float(Data.rule("wave_bonus_base", 0)) + float(Data.rule("wave_bonus_per_wave", 0)) * w))
+	if bonus > 0:
+		coins += bonus
 	if is_boss_wave:
 		var b: Dictionary = bosses[str(w)]
-		var info: Dictionary = Data.d["enemies"][b["enemy"]]
+		var bid := str(b["enemy"])
+		if has_d and d.get("bosses", {}).has(str(w)) and Data.d["enemies"].has(str(d["bosses"][str(w)])):
+			bid = str(d["bosses"][str(w)])
+		var info: Dictionary = Data.d["enemies"][bid]
+		var bhp := float(b["hp"]) * (_boss_hp_mult() if has_d else 1.0)
 		boss_timer = float(Data.rule("boss_time_limit", 60))
-		spawn_queue.append({"id": str(b["enemy"]), "hp": float(b["hp"]),
-				"reward": int(float(info["reward"]) * (1.0 + growth * w))})
+		spawn_queue.append({"id": bid, "hp": bhp,
+				"reward": int(round(float(info["reward"]) * (1.0 + growth * w) * coin_mult))})
 		spawn_interval = 0.5
 		Sfx.play("boss_warning")
 		Sfx.play_bgm("bgm_boss")
@@ -1159,23 +1355,163 @@ func _start_wave(w: int) -> void:
 		_popup(str(info.get("name", "")), Color(1, 0.8, 0.8), 590.0, 38)
 		_boss_intro()
 	else:
-		var count := int(round(float(Data.rule("count_base", 14)) + float(Data.rule("count_per_wave", 0.6)) * w))
+		var cmult := float(d.get("count_mult", 1.0)) if has_d else 1.0
+		var count := int(round((float(Data.rule("count_base", 14)) + float(Data.rule("count_per_wave", 0.6)) * w) * cmult))
 		var mult := pow(float(Data.rule("hp_growth", 1.12)), w - 1)
+		if has_d:
+			mult *= Data.hp_curve_at(w) * float(d.get("hp_mult", 1.0))
 		for i in count:
 			var eid := _pick_enemy(w)
 			var info: Dictionary = Data.d["enemies"][eid]
 			spawn_queue.append({"id": eid, "hp": float(info["hp"]) * mult,
-					"reward": max(1, int(round(float(info["reward"]) * (1.0 + growth * w))))})
+					"reward": max(1, int(round(float(info["reward"]) * (1.0 + growth * w) * coin_mult)))})
 		spawn_interval = (float(Data.rule("wave_seconds", 25)) * 0.6) / max(1, count)
 		Sfx.play("wave_start")
 		Sfx.play_bgm("bgm_battle")
 		_wave_banner(w)
+	if bonus > 0 and not autoplay:
+		_popup("웨이브 보너스 +%d" % bonus, Color(1, 0.9, 0.5), 700.0, 26)
 	spawn_timer = 0.0
 	if autoplay:
 		var gs: Array = []
 		for g in range(1, Data.max_grade() + 1):
 			gs.append(_slots_of_grade(g).size())
 		print("[wave %d] coins=%d units(g1..g5)=%s enemies=%d t=%.0fs" % [w, coins, str(gs), enemies.size(), elapsed])
+
+
+# ------------------------------------------------------------------ 모임 이벤트 (웨이브 사이 카드 3택1)
+func _event_def(id: String) -> Dictionary:
+	for e in Data.events:
+		if str(e["id"]) == id:
+			return e
+	return {}
+
+
+## 좋음 1 + 도박/중립 1 + (가끔) 나쁨 1 — 부족하면 남은 것으로 채움. enabled 만.
+func _draw_event_cards() -> Array:
+	var avail: Array = []
+	for e in Data.events:
+		if bool(e.get("enabled", false)):
+			avail.append(e)
+	var out: Array = []
+	var groups: Array = [["좋음"], ["도박", "중립"]]
+	if rng.randf() < 0.4:
+		groups.append(["나쁨"])
+	for g in groups:
+		var cand: Array = []
+		for e in avail:
+			if g.has(str(e["kind"])) and not out.has(e):
+				cand.append(e)
+		if not cand.is_empty():
+			out.append(_weighted_event(cand))
+	while out.size() < 3:
+		var cand2: Array = []
+		for e in avail:
+			if not out.has(e) and str(e["kind"]) != "나쁨":
+				cand2.append(e)
+		if cand2.is_empty():
+			break
+		out.append(_weighted_event(cand2))
+	out.shuffle()
+	return out
+
+
+func _weighted_event(cand: Array) -> Dictionary:
+	var total := 0.0
+	for e in cand:
+		total += float(e.get("weight", 1))
+	var x := rng.randf() * total
+	for e in cand:
+		x -= float(e.get("weight", 1))
+		if x <= 0.0:
+			return e
+	return cand[0]
+
+
+func _open_event(w: int, cards: Array) -> void:
+	if autoplay:      # 봇은 첫 장을 고름(도박 판돈은 걸지 않음)
+		_event_chosen(cards[0], 0)
+		return
+	var m := EventsScript.new()
+	m.setup(self, w, cards, float(Data.rule("event_pick_sec", 8)))
+	m.picked.connect(_event_chosen)
+	open_modal(m)
+
+
+func _event_chosen(ev: Dictionary, arg: int) -> void:
+	close_modal()
+	var msg := _apply_event(ev, arg)
+	_begin_wave(pending_wave)
+	if msg != "" and not autoplay:
+		_popup(msg, Color(1, 0.95, 0.7), 640.0, 30)
+
+
+func _apply_event(ev: Dictionary, arg: int) -> String:
+	var w := pending_wave
+	var v1 := float(ev.get("v1", 0))
+	var v2 := float(ev.get("v2", 0))
+	var v3 := float(ev.get("v3", 0))
+	match str(ev["id"]):
+		"ev_start_roulette":
+			Sfx.play("roulette_spin")
+			match rng.randi() % 3:
+				0:
+					atk_buff = 1.0 + v1
+					atk_buff_wave = w
+					return "룰렛: 공격력 +%d%% (이번 웨이브)" % int(v1 * 100)
+				1:
+					coins += int(v2)
+					return "룰렛: 코인 +%d" % int(v2)
+				_:
+					var i := _free_slot()
+					if i >= 0:
+						_place_unit(i, _random_char(), 1)
+						_recalc_units()
+						spawn_fx("fx", "summon_poof", slot_center(i))
+						return "룰렛: 무료 소환!"
+					coins += 20
+					return "룰렛: 무료 소환인데 자리가 없어서 코인 +20"
+		"ev_hourglass":
+			Sfx.play("hourglass_flip")
+			freeze_t = v1
+			freeze_total = v1
+			global_slow_t = v1 + v2
+			global_slow_f = v3
+			return "모래시계 뒤집었다! 적 %d초 정지" % int(v1)
+		"ev_dice_bet":
+			var bet := arg
+			if bet <= 0 or bet > coins:
+				return "안 걸었다. 쫄보."
+			var roll := rng.randi_range(1, 6)
+			if roll <= 2:
+				coins -= bet
+				return "주사위 %d… -%d 코인" % [roll, bet]
+			if roll >= 5:
+				coins += bet
+				return "주사위 %d! +%d 코인" % [roll, bet]
+			return "주사위 %d. 본전." % roll
+		"ev_host_call":
+			var i2 := _free_slot()
+			if i2 >= 0:
+				_place_unit(i2, _random_char(), int(v1))
+				_recalc_units()
+				spawn_fx("fx", "merge_up_g2", slot_center(i2), 1.1)
+				return "벙주 등장! %d성 무료" % int(v1)
+			coins += 40
+			return "벙주 왔는데 자리가 없다. 코인 +40"
+		"ev_noshow":
+			var live: Array = []
+			for u in slots:
+				if u != null:
+					live.append(u)
+			coins += int(v2)
+			if live.is_empty():
+				return "노쇼… 위약금 +%d" % int(v2)
+			var pick = live[rng.randi() % live.size()]
+			pick.set_absent(true)
+			absent_units.append(pick)
+			return "%s 노쇼! 위약금 +%d" % [Data.unit_name(pick.char_id), int(v2)]
+	return ""
 
 
 func _wave_banner(w: int) -> void:
@@ -1259,6 +1595,10 @@ func _process(delta: float) -> void:
 	if game_over:
 		return
 	elapsed += delta
+	if freeze_t > 0.0:
+		freeze_t -= delta
+	if global_slow_t > 0.0:
+		global_slow_t -= delta
 	_spawn_tick(delta)
 	wave_time += delta
 	if is_boss_wave:
@@ -1272,12 +1612,12 @@ func _process(delta: float) -> void:
 			clear_t = float(Data.rule("clear_next_wave_sec", 3))
 		clear_t -= delta
 		if clear_t <= 0.0:
-			if wave >= int(Data.rule("total_waves", 40)):
+			if wave >= _total_waves():
 				_end(true)
 				return
 			_start_wave(wave + 1)
 	elif wave_time >= float(Data.rule("wave_seconds", 25)):
-		if wave >= int(Data.rule("total_waves", 40)):
+		if wave >= _total_waves():
 			_end(true)
 			return
 		_start_wave(wave + 1)
@@ -1326,10 +1666,23 @@ func _end(win: bool, reason: String = "") -> void:
 		var gs: Array = []
 		for g in range(1, Data.max_grade() + 1):
 			gs.append(_slots_of_grade(g).size())
-		print("RESULT win=%s wave=%d kills=%d coins=%d units=%s time=%.0fs %s" % [win, wave, kills, coins, str(gs), elapsed, reason])
+		var nd := 0
+		var np := 0
+		var maxen := 0
+		for u in slots:
+			if u != null:
+				nd += 1 if Data.is_dud(u.char_id) else 0
+				np += 1 if Data.is_pet(u.char_id) else 0
+		print("RESULT win=%s wave=%d kills=%d coins=%d units=%s time=%.0fs dungeon=%d duds=%d pets=%d %s" % [win, wave, kills, coins, str(gs), elapsed, dungeon_n, nd, np, reason])
 		get_tree().quit()
 		return
 	close_modal()
+	var gcount: Dictionary = {}
+	for g in range(1, Data.max_grade() + 1):
+		gcount["g%d" % g] = _slots_of_grade(g).size()
+	var sv0 := get_node_or_null("/root/Save")
+	if sv0 != null and "run_meta" in sv0:
+		sv0.run_meta = {"units": gcount, "play_sec": int(elapsed)}
 	run_result = {"shards": 0, "best_wave": wave, "new_best": false}
 	var sv := get_node_or_null("/root/Save")
 	if sv != null and sv.has_method("record_run"):

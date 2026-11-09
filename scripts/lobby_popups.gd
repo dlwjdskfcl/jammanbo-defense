@@ -35,15 +35,25 @@ static func dungeon_list(host: Control, save: Node, on_pick: Callable) -> void:
 				K.GOLD if is_sel else (K.ROW_LINE if st != "locked" else Color(0.22, 0.2, 0.3)), 14, 4 if is_sel else 2))
 		layer.add_child(K.label(str(n), 34, Vector2(80, y), Vector2(70, row_h), K.GOLD if st != "locked" else K.DIM))
 		var nm: String = "던전 %d" % n if save == null else str(save.dungeon_name(n))
-		layer.add_child(K.label(nm, 32, Vector2(155, y + 4), Vector2(270, row_h * 0.6), K.WHITE if st != "locked" else K.DIM,
+		var def: Dictionary = {} if save == null else save.dungeon_def(n)
+		var ipath := "res://assets/stage/dungeon/%s%s.png" % [str(def.get("icon", "")), "_locked" if st == "locked" else ""]
+		var name_x := 155.0
+		if str(def.get("icon", "")) != "" and ResourceLoader.exists(ipath):
+			layer.add_child(K.icon(ipath, Vector2(150, y + (row_h - 58.0) * 0.5), 0.6))
+			name_x = 218.0
+		layer.add_child(K.label(nm, 32, Vector2(name_x, y + 4), Vector2(270, row_h * 0.6), K.WHITE if st != "locked" else K.DIM,
 				HORIZONTAL_ALIGNMENT_LEFT))
 		var sub := ""
 		if st == "locked":
-			sub = "이전 던전을 클리어하면 열려요"
+			var need: String = "" if save == null else str(save.dungeon_unlock_name(n))
+			sub = "%s 던전을 먼저 클리어해요" % need if need != "" else "아직 열리지 않았어요"
 		else:
 			var bw: int = 0 if save == null else int(save.dungeon_best_wave(n))
 			sub = "최고 웨이브 %d" % bw if bw > 0 else "아직 기록이 없어요"
-		layer.add_child(K.label(sub, 19, Vector2(157, y + row_h * 0.55), Vector2(330, row_h * 0.4), K.DIM,
+			var rec: int = 0 if save == null else int(save.dungeon_rec_card_lv(n))
+			if rec > 0:
+				sub += "  ·  권장 Lv %d" % rec
+		layer.add_child(K.label(sub, 19, Vector2(name_x + 2, y + row_h * 0.55), Vector2(330, row_h * 0.4), K.DIM,
 				HORIZONTAL_ALIGNMENT_LEFT, false))
 		var tag := {"clear": "클리어", "open": "도전 가능", "locked": ""}[st] as String
 		var tcol := {"clear": K.GREEN, "open": K.GOLD, "locked": K.DIM}[st] as Color

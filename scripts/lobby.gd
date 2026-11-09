@@ -77,8 +77,8 @@ func _ready() -> void:
 			save.runs = 9
 			save.wins = 2
 			save.total_kills = 412
-			save._dungeons = {1: {"best_wave": 40, "cleared": true}, 2: {"best_wave": 31, "cleared": true},
-					3: {"best_wave": 23, "cleared": false}}
+			save._dungeons = {"d01": {"best_wave": 40, "cleared": true}, "d02": {"best_wave": 31, "cleared": true},
+					"d03": {"best_wave": 23, "cleared": false}}
 			save.selected_dungeon = 3
 			save._quest = {"date": save.today(), "runs": 1, "wave": 23, "claimed": []}
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -185,15 +185,15 @@ func _build_home() -> void:
 
 	# 던전 카드 (가장 중요)
 	dungeon_box = Control.new()
-	dungeon_box.size = Vector2(720, 300)
-	dungeon_box.position = Vector2(0, 628)
+	dungeon_box.size = Vector2(720, 290)
+	dungeon_box.position = Vector2(0, 618)
 	dungeon_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	home.add_child(dungeon_box)
-	btn_start = K.button("res://assets/td/ui/btn_green_big.png", "게임 시작", Rect2(130, 905, 460, 140), _start_game, 54)
+	btn_start = K.button("res://assets/td/ui/btn_green_big.png", "게임 시작", Rect2(130, 912, 460, 130), _start_game, 52)
 	home.add_child(btn_start)
 
 	# 아래 줄: 오늘의 할 일 / 잠만보 모임
-	home.add_child(K.panel(Rect2(30, 1060, 330, 84), Color(0.13, 0.1, 0.22), K.ROW_LINE, 16, 3))
+	home.add_child(K.panel(Rect2(30, 1058, 330, 88), Color(0.13, 0.1, 0.22), K.ROW_LINE, 16, 3))
 	home.add_child(K.icon(C + "icon_mission.png", Vector2(46, 1082), 1.9))
 	quest_btn_label = K.label("", 22, Vector2(112, 1060), Vector2(240, 84), K.WHITE, HORIZONTAL_ALIGNMENT_LEFT, false)
 	home.add_child(quest_btn_label)
@@ -242,6 +242,14 @@ func _count() -> int:
 	return 10 if save == null else int(save.dungeon_count())
 
 
+func _icon_path(def: Dictionary, locked: bool) -> String:
+	var base := str(def.get("icon", ""))
+	if base == "":
+		return ""
+	var path := "res://assets/stage/dungeon/%s%s.png" % [base, "_locked" if locked else ""]
+	return path if ResourceLoader.exists(path) else ""
+
+
 func _draw_dungeon() -> void:
 	for c in dungeon_box.get_children():
 		c.queue_free()
@@ -250,51 +258,82 @@ func _draw_dungeon() -> void:
 	var st := Popups.dungeon_state(save, n)
 	var locked := st == "locked"
 	var col := K.GOLD if st == "open" else (K.GREEN if st == "clear" else K.ROW_LINE)
-	dungeon_box.add_child(K.panel(Rect2(30, 0, 660, 262), Color(0.11, 0.085, 0.19, 0.95), col, 20, 4))
-	var defs: Array = [] if save == null else save.dungeon_defs()
-	var def: Dictionary = defs[n - 1] if (n >= 1 and n <= defs.size()) else {}
+	dungeon_box.add_child(K.panel(Rect2(30, 0, 660, 282), Color(0.11, 0.085, 0.19, 0.95), col, 20, 4))
+	var def: Dictionary = {} if save == null else save.dungeon_def(n)
 	var nm: String = "던전 %d" % n if save == null else str(save.dungeon_name(n))
-	dungeon_box.add_child(K.label("던전 %d / %d" % [n, count], 22, Vector2(130, 12), Vector2(460, 34), K.DIM, HORIZONTAL_ALIGNMENT_CENTER, false))
-	dungeon_box.add_child(K.label(nm, 62, Vector2(130, 44), Vector2(460, 96), K.DIM if locked else K.GOLD))
-	if locked:
-		dungeon_box.add_child(K.icon(C + "icon_lock.png", Vector2(560, 74), 2.0))
+	dungeon_box.add_child(K.label("던전 %d / %d" % [n, count], 21, Vector2(130, 8), Vector2(460, 30), K.DIM, HORIZONTAL_ALIGNMENT_CENTER, false))
+	var icon_path := _icon_path(def, locked)
+	var name_x := 130.0
+	var name_w := 460.0
+	if icon_path != "":
+		dungeon_box.add_child(K.icon(icon_path, Vector2(134, 38), 0.8))
+		name_x = 224.0
+		name_w = 370.0
+	dungeon_box.add_child(K.label(nm, 54, Vector2(name_x, 36), Vector2(name_w, 76), K.DIM if locked else K.GOLD))
+	if locked and icon_path == "":
+		dungeon_box.add_child(K.icon(C + "icon_lock.png", Vector2(560, 56), 2.0))
+	var concept := str(def.get("concept", ""))
+	if concept != "":
+		var cl := K.label(concept, 18, Vector2(128, 112), Vector2(464, 54), Color(0.85, 0.82, 0.95), HORIZONTAL_ALIGNMENT_CENTER, false)
+		cl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		cl.max_lines_visible = 2
+		cl.size = Vector2(464, 54)
+		dungeon_box.add_child(cl)
 	var line := ""
+	var line_col := K.WHITE
 	if locked:
-		line = "'%s'를 클리어하면 열려요" % ("" if save == null else str(save.dungeon_name(n - 1)))
+		var need: String = "" if save == null else str(save.dungeon_unlock_name(n))
+		line = "%s 던전을 먼저 클리어해요" % need if need != "" else "아직 열리지 않았어요"
+		line_col = Color(1, 0.75, 0.75)
 	else:
 		var bw: int = 0 if save == null else int(save.dungeon_best_wave(n))
-		var total := int(Data.rule("total_waves", 40))
+		var total := int(def.get("waves", Data.rule("total_waves", 40)))
 		line = ("최고 웨이브 %d / %d" % [bw, total]) if bw > 0 else "아직 기록이 없어요"
-		line += "  ·  " + ("클리어" if st == "clear" else "도전 가능")
-	dungeon_box.add_child(K.label(line, 24, Vector2(60, 144), Vector2(600, 40), K.GREEN if st == "clear" else K.WHITE,
-			HORIZONTAL_ALIGNMENT_CENTER, false))
-	var extra := Popups.difficulty_text(def)
+		line += "  ·  " + ("클리어 (재도전)" if st == "clear" else "도전 가능")
+		line_col = K.GREEN if st == "clear" else K.WHITE
+	dungeon_box.add_child(K.label(line, 22, Vector2(60, 168), Vector2(600, 32), line_col, HORIZONTAL_ALIGNMENT_CENTER, false))
+	# 권장 카드 Lv vs 내 평균
+	var rec: int = 0 if save == null else int(save.dungeon_rec_card_lv(n))
+	if rec > 0 and save != null:
+		var avg: float = save.avg_card_level()
+		var verdict := "충분해요"
+		var vcol := K.GREEN
+		if avg < rec - 2.0:
+			verdict = "조금 어려울 수 있어요"
+			vcol = Color(1, 0.65, 0.4)
+		elif avg < rec:
+			verdict = "도전해 볼 만해요"
+			vcol = K.GOLD
+		dungeon_box.add_child(K.label("권장 카드 Lv %d  ·  내 평균 Lv %s  —  %s" % [rec, str(snappedf(avg, 0.1)), verdict], 19,
+				Vector2(40, 200), Vector2(640, 28), vcol, HORIZONTAL_ALIGNMENT_CENTER, false))
 	var rm: float = 1.0 if save == null else float(save.dungeon_reward_mult(n))
-	var extra2 := "재료 보상 x%s" % str(snappedf(rm, 0.01))
-	dungeon_box.add_child(K.label((extra + "  ·  " if extra != "" else "") + extra2, 20, Vector2(60, 184), Vector2(600, 32), K.DIM,
-			HORIZONTAL_ALIGNMENT_CENTER, false))
+	var fc: int = 0 if save == null else int(save.dungeon_first_clear_shards(n))
+	var reward := "재료 x%s" % str(snappedf(rm, 0.01))
+	if fc > 0 and st != "clear":
+		reward += "  ·  첫 클리어 +%d" % fc
+	dungeon_box.add_child(K.label(reward, 19, Vector2(40, 226), Vector2(640, 26), K.DIM, HORIZONTAL_ALIGNMENT_CENTER, false))
 	# 단계 점
 	var step := 40.0
 	var x0 := 360.0 - step * (count - 1) * 0.5
 	for i in range(1, count + 1):
-		var s := Popups.dungeon_state(save, i)
-		var tex := "pip_star_on.png" if s == "clear" else ("pip_on.png" if s == "open" else "pip_off.png")
-		var ic := K.icon(C + tex, Vector2(x0 + (i - 1) * step - 13, 222), 1.0)
+		var sti := Popups.dungeon_state(save, i)
+		var tex := "pip_star_on.png" if sti == "clear" else ("pip_on.png" if sti == "open" else "pip_off.png")
+		var ic := K.icon(C + tex, Vector2(x0 + (i - 1) * step - 13, 252), 1.0)
 		if i == n:
-			ic.scale = Vector2(1.4, 1.4)
-			ic.position -= Vector2(5, 5)
+			ic.scale = Vector2(1.3, 1.3)
+			ic.position -= Vector2(4, 4)
 		dungeon_box.add_child(ic)
 	# 좌우 화살표 + 가운데 누르면 목록
 	for d in [-1, 1]:
 		var ok: bool = (n + d >= 1) and (n + d <= count)
-		var lab := K.label("<" if d < 0 else ">", 64, Vector2(30 if d < 0 else 600, 40), Vector2(90, 100), K.GOLD if ok else Color(0.4, 0.37, 0.5))
+		var lab := K.label("<" if d < 0 else ">", 64, Vector2(30 if d < 0 else 600, 60), Vector2(90, 100), K.GOLD if ok else Color(0.4, 0.37, 0.5))
 		dungeon_box.add_child(lab)
-		dungeon_box.add_child(K.hit_area(Rect2(24 if d < 0 else 594, 0, 102, 262), _step_dungeon.bind(d)))
-	dungeon_box.add_child(K.hit_area(Rect2(130, 0, 460, 262), _open_dungeon_list))
+		dungeon_box.add_child(K.hit_area(Rect2(24 if d < 0 else 594, 0, 102, 282), _step_dungeon.bind(d)))
+	dungeon_box.add_child(K.hit_area(Rect2(130, 0, 460, 282), _open_dungeon_list))
 	# 시작 버튼 상태
 	btn_start.disabled = locked
 	btn_start.modulate = Color.WHITE if not locked else Color(0.5, 0.5, 0.55)
-	(btn_start.get_child(0) as Label).text = "잠긴 던전" if locked else "게임 시작"
+	(btn_start.get_child(0) as Label).text = "잠긴 던전" if locked else ("다시 도전" if st == "clear" else "게임 시작")
 
 
 func _step_dungeon(d: int) -> void:
@@ -524,6 +563,10 @@ func _shot_setup() -> void:
 	match start_page:
 		"cards":
 			_show_page("cards")
+		"club":
+			_show_page("cards")
+			cards.sel = cards.ids.size() - 1
+			cards._build()
 		"settings":
 			_open_settings()
 		"odds":

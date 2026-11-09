@@ -27,6 +27,9 @@ func setup(g, from: Vector2, tgt, dmg: float, st: Dictionary, source = null, ex:
 	last_pos = tgt.position
 	_rotate = str(st["projectile"]) == "bark_wave"
 	var sf = U.atlas_frames("projectiles", str(st["projectile"]), true)
+	var missing: bool = sf == null
+	if missing:       # 투사체 그림이 아직 없으면 hit_spark 로 대체
+		sf = U.atlas_frames("projectiles", "hit_spark", true)
 	if sf != null:
 		spr = AnimatedSprite2D.new()
 		spr.sprite_frames = sf
@@ -34,6 +37,8 @@ func setup(g, from: Vector2, tgt, dmg: float, st: Dictionary, source = null, ex:
 		spr.play("default")
 		if ex.get("punch", false):
 			scale = Vector2(1.5, 1.5)
+		elif missing:
+			scale = Vector2(0.7, 0.7)
 	z_index = 5
 
 
